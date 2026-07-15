@@ -32,19 +32,35 @@
     <div class="container card-container">
         <!-- Profile summary card -->
         <div class="farmer-card">
-            <div class="card-header-custom">
-                <span><i class="fas fa-user-circle"></i> {{ current_farmer.name }}</span>
-                <span class="badge bg-dark">{{ current_farmer.village_mandal }}</span>
-            </div>
-            <div class="card-body-custom">
-                <p class="mb-1" style="color: var(--text-secondary);">
-                    {% if lang_pref == 'te' %}
-                    ముఖ్యమైన పంట: <strong>{{ current_farmer.primary_crop }}</strong> | భూమి పరిమాణం: <strong>{{ current_farmer.land_size_acres }} ఎకరాలు</strong>
-                    {% else %}
-                    Primary Crop: <strong>{{ current_farmer.primary_crop }}</strong> | Land: <strong>{{ current_farmer.land_size_acres }} Acres</strong>
-                    {% endif %}
-                </p>
-            </div>
+            {% if not current_farmer.name or not current_farmer.village_mandal or not current_farmer.primary_crop %}
+                <div class="card-header-custom bg-warning text-dark d-flex align-items-center justify-content-between">
+                    <span><i class="fas fa-exclamation-triangle"></i> {% if lang_pref == 'te' %}ప్రొఫైల్ వివరాలు పూర్తి కాలేదు{% else %}Profile Incomplete{% endif %}</span>
+                    <a href="/settings" class="btn btn-sm btn-dark" style="padding: 2px 8px; font-size: 12px; text-decoration: none; border-radius: 4px;">{% if lang_pref == 'te' %}పూర్తి చేయండి{% else %}Complete Now{% endif %}</a>
+                </div>
+                <div class="card-body-custom py-3">
+                    <p class="mb-0 text-light-secondary small text-center">
+                        {% if lang_pref == 'te' %}
+                        దయచేసి ఖచ్చితమైన సలహాల కోసం మీ సమాచారాన్ని నమోదు చేయండి.
+                        {% else %}
+                        Please fill in your details to receive personalized crop advisory and weather alerts.
+                        {% endif %}
+                    </p>
+                </div>
+            {% else %}
+                <div class="card-header-custom">
+                    <span><i class="fas fa-user-circle"></i> {{ current_farmer.name }}</span>
+                    <span class="badge bg-dark">{{ current_farmer.village_mandal }}</span>
+                </div>
+                <div class="card-body-custom">
+                    <p class="mb-1" style="color: var(--text-secondary);">
+                        {% if lang_pref == 'te' %}
+                        ముఖ్యమైన పంట: <strong>{{ current_farmer.primary_crop }}</strong> | భూమి పరిమాణం: <strong>{{ current_farmer.land_size_acres }} ఎకరాలు</strong>
+                        {% else %}
+                        Primary Crop: <strong>{{ current_farmer.primary_crop }}</strong> | Land: <strong>{{ current_farmer.land_size_acres }} Acres</strong>
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Big Diagnosis Action Card -->
@@ -103,12 +119,6 @@
         </div>
     </div>
 
-    <!-- Voice Recording Float button -->
-    <div class="voice-assistant">
-        <button class="btn-voice" id="btn-voice" title="{{ ui.voice_btn }}">
-            <i class="fas fa-microphone"></i>
-        </button>
-    </div>
 
     <!-- Bottom Nav bar -->
     <div class="bottom-nav">

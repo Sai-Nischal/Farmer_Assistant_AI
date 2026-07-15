@@ -17,7 +17,7 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="/" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
+        <a href="/dashboard" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
             <i class="fas fa-arrow-left"></i>
         </a>
         <h1>{{ ui.settings }}</h1>
@@ -64,7 +64,7 @@
                             <label for="name" class="form-premium-label small">
                                 {% if lang_pref == 'te' %}రైతు పేరు (Farmer Name):{% else %}Farmer Name:{% endif %}
                             </label>
-                            <input type="text" class="form-control form-control-premium" id="name" name="name" value="{{ current_farmer.name }}" required>
+                            <input type="text" class="form-control form-control-premium" id="name" name="name" value="{{ current_farmer.name }}" placeholder="{% if lang_pref == 'te' %}మీ పేరు నమోదు చేయండి...{% else %}Enter your name...{% endif %}" required>
                         </div>
 
                         <!-- Village / Mandal -->
@@ -73,6 +73,7 @@
                                 {% if lang_pref == 'te' %}గ్రామం / మండలం (Village/Mandal):{% else %}Village / Mandal:{% endif %}
                             </label>
                             <select class="form-select form-select-premium" id="village_mandal" name="village_mandal" required>
+                                <option value="" {% if not current_farmer.village_mandal %}selected{% endif %} disabled>{% if lang_pref == 'te' %}గ్రామం / మండలం ఎంచుకోండి...{% else %}Select Village / Mandal...{% endif %}</option>
                                 <option value="Guntur" {% if current_farmer.village_mandal == 'Guntur' %}selected{% endif %}>Guntur (గుంటూరు)</option>
                                 <option value="Anantapur" {% if current_farmer.village_mandal == 'Anantapur' %}selected{% endif %}>Anantapur (అనంతపురం)</option>
                                 <option value="Nellore" {% if current_farmer.village_mandal == 'Nellore' %}selected{% endif %}>Nellore (నెల్లూరు)</option>
@@ -98,7 +99,7 @@
                             <label for="land_size_acres" class="form-premium-label small">
                                 {% if lang_pref == 'te' %}భూమి పరిమాణం ఎకరాలలో (Land in Acres):{% else %}Land Size (Acres):{% endif %}
                             </label>
-                            <input type="number" step="0.1" class="form-control form-control-premium" id="land_size_acres" name="land_size_acres" value="{{ current_farmer.land_size_acres }}" required>
+                            <input type="number" step="0.1" min="0" class="form-control form-control-premium" id="land_size_acres" name="land_size_acres" value="{% if current_farmer.land_size_acres > 0 %}{{ current_farmer.land_size_acres }}{% endif %}" placeholder="{% if lang_pref == 'te' %}భూమి సైజు (ఉదా: 2.5)...{% else %}Land size (e.g. 2.5)...{% endif %}" required>
                         </div>
 
                         <!-- Primary Crop -->
@@ -107,6 +108,7 @@
                                 {% if lang_pref == 'te' %}ముఖ్యమైన పంట (Primary Crop):{% else %}Primary Crop:{% endif %}
                             </label>
                             <select class="form-select form-select-premium" id="primary_crop" name="primary_crop" required>
+                                <option value="" {% if not current_farmer.primary_crop %}selected{% endif %} disabled>{% if lang_pref == 'te' %}పంట ఎంచుకోండి...{% else %}Select Primary Crop...{% endif %}</option>
                                 <option value="Paddy" {% if current_farmer.primary_crop == 'Paddy' %}selected{% endif %}>Paddy / వరి</option>
                                 <option value="Cotton" {% if current_farmer.primary_crop == 'Cotton' %}selected{% endif %}>Cotton / పత్తి</option>
                                 <option value="Chilli" {% if current_farmer.primary_crop == 'Chilli' %}selected{% endif %}>Chilli / మిరప</option>

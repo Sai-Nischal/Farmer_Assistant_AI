@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.title }}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#1b4332">
+</head>
+<body data-lang="{{ lang_pref }}">
+
+    <!-- Offline Notification Banner -->
+    <div class="offline-banner" id="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <h1><i class="fas fa-seedling"></i> {{ ui.title }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container mb-5">
+        <!-- Hero Section -->
+        <div class="farmer-card p-4 text-center text-light bg-dark-green" style="background: linear-gradient(135deg, #1b4332 0%, #081c15 100%); border: 1px solid var(--border-color);">
+            <div class="display-6 mb-3 font-weight-bold" style="color: var(--accent-gold);">
+                <i class="fas fa-hand-holding-seedling"></i> 
+                {% if lang_pref == 'te' %}రైతు సహాయ వ్యవస్థకు స్వాగతం{% else %}Welcome to Your Smart Farm Assistant{% endif %}
+            </div>
+            <p class="lead" style="color: #d8f3dc; font-size: 16px;">
+                {% if lang_pref == 'te' %}
+                మీ పంటలను రక్షించండి, స్మార్ట్ వాతావరణ అప్‌డేట్‌లను పొందండి మరియు అర్హత కలిగిన ప్రభుత్వ పథకాలను సులభంగా కనుగొనండి.
+                {% else %}
+                Protect your crops, receive smart weather-aware farming recommendations, and easily discover government welfare schemes.
+                {% endif %}
+            </p>
+            <a href="/dashboard" class="btn btn-large-tap btn-primary-custom mt-3" style="font-size: 18px; padding: 10px 30px;">
+                <i class="fas fa-arrow-right"></i> 
+                {% if lang_pref == 'te' %}ప్రవేశించండి (Enter Portal){% else %}Enter Assistant Portal{% endif %}
+            </a>
+        </div>
+
+        <!-- How it helps section -->
+        <h4 class="text-light mt-4 mb-3"><i class="fas fa-info-circle text-success"></i> 
+            {% if lang_pref == 'te' %}ఈ వెబ్‌సైట్ రైతులకు ఎలా సహాయపడుతుంది?{% else %}How This Website Helps Farmers{% endif %}
+        </h4>
+
+        <div class="row g-3">
+            <!-- Feature 1 -->
+            <div class="col-md-6">
+                <div class="farmer-card h-100">
+                    <div class="card-header-custom" style="background: #2d6a4f;">
+                        <span><i class="fas fa-camera text-warning"></i> {% if lang_pref == 'te' %}పంట తెగులు నిర్ధారణ{% else %}Crop Disease Diagnosis{% endif %}</span>
+                    </div>
+                    <div class="card-body-custom">
+                        <p class="small mb-0 text-light-secondary">
+                            {% if lang_pref == 'te' %}
+                            మీరు పండించే పంట యొక్క ఆకు ఫోటోను అప్‌లోడ్ చేసి, దానికి సోకిన తెగులును ఆర్టిఫిషియల్ ఇంటెలిజెన్స్ (AI) సహాయంతో వెంటనే గుర్తించవచ్చు.
+                            {% else %}
+                            Take or upload a photo of your crop's leaf to instantly diagnose diseases, pests, or nutrient deficiencies using AI.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6">
+                <div class="farmer-card h-100">
+                    <div class="card-header-custom" style="background: #2d6a4f;">
+                        <span><i class="fas fa-cloud-sun text-warning"></i> {% if lang_pref == 'te' %}వాతావరణ ఆధారిత సలహాలు{% else %}Weather-Aware Advisories{% endif %}</span>
+                    </div>
+                    <div class="card-body-custom">
+                        <p class="small mb-0 text-light-secondary">
+                            {% if lang_pref == 'te' %}
+                            రాబోయే వాతావరణాన్ని విశ్లేషించి, వర్షం పడే అవకాశం ఉన్నప్పుడు మందు పిచికారీ మరియు నీటి సరఫరా ఎప్పుడు చేయాలో సరైన సలహాలు ఇస్తుంది.
+                            {% else %}
+                            Analyzes local forecasts to advice you when to delay spraying (due to wind/rain warnings) or irrigation (due to upcoming rainfall).
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6">
+                <div class="farmer-card h-100">
+                    <div class="card-header-custom" style="background: #2d6a4f;">
+                        <span><i class="fas fa-file-invoice-dollar text-warning"></i> {% if lang_pref == 'te' %}ప్రభుత్వ పథకాలు{% else %}Government Welfare Schemes{% endif %}</span>
+                    </div>
+                    <div class="card-body-custom">
+                        <p class="small mb-0 text-light-secondary">
+                            {% if lang_pref == 'te' %}
+                            మీ భూమి పరిమాణం మరియు పంట ఆధారంగా అర్హత కలిగిన పథకాలను వడపోసి, దరఖాస్తు చేసుకోవడానికి లింకులను అందిస్తుంది.
+                            {% else %}
+                            Filters state and central welfare schemes according to your land size and crop type, showing only schemes you qualify for.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6">
+                <div class="farmer-card h-100">
+                    <div class="card-header-custom" style="background: #2d6a4f;">
+                        <span><i class="fas fa-comments text-warning"></i> {% if lang_pref == 'te' %}ద్విభాషా సహాయకుడు{% else %}Bilingual Advisor Chat{% endif %}</span>
+                    </div>
+                    <div class="card-body-custom">
+                        <p class="small mb-0 text-light-secondary">
+                            {% if lang_pref == 'te' %}
+                            తెలుగు మరియు ఇంగ్లీష్ భాషలలో ప్రశ్నలు అడగవచ్చు. ఇది మీ గ్రామీణ తెలుగు భాషను అర్థం చేసుకొని తగిన సమాధానాలు ఇస్తుంది.
+                            {% else %}
+                            Interact in English or Telugu. The system accepts transliterated Telugu inputs and translates guidelines into simple regional Telugu.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Farming Knowledge Section -->
+        <h4 class="text-light mt-4 mb-3"><i class="fas fa-book-open text-success"></i> 
+            {% if lang_pref == 'te' %}వ్యవసాయ విజ్ఞాన కేంద్రం (Knowledge Hub){% else %}Farming Knowledge Hub{% endif %}
+        </h4>
+
+        <div class="farmer-card">
+            <div class="card-body-custom">
+                <div class="accordion accordion-flush" id="knowledgeAccordion">
+                    
+                    <!-- Guide 1 -->
+                    <div class="accordion-item bg-dark text-light border-secondary">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed bg-dark text-light border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                <i class="fas fa-tint text-primary me-2"></i> 
+                                {% if lang_pref == 'te' %}స్మార్ట్ నీటి యాజమాన్యం (Water Management){% else %}Smart Irrigation & Water Management{% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#knowledgeAccordion">
+                            <div class="accordion-body text-light-secondary small">
+                                {% if lang_pref == 'te' %}
+                                <ul>
+                                    <li><strong>డ్రిప్ ఇరిగేషన్:</strong> మొక్కల వేర్లకు నేరుగా నీటిని అందించడం ద్వారా 40% వరకు నీటిని ఆదా చేయవచ్చు.</li>
+                                    <li><strong>వాతావరణ పరిశీలన:</strong> రాబోయే 2 రోజుల్లో వర్షం కురిసే అవకాశం ఉంటే నీటి తడులను వాయిదా వేయండి.</li>
+                                    <li><strong>సేంద్రీయ ఆచ్ఛాదన (Mulching):</strong> నేలలోని తేమ ఆవిరి కాకుండా కాపాడటానికి ఎండుటాకులు లేదా ప్లాస్టిక్ షీట్లను వాడండి.</li>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <li><strong>Drip Irrigation:</strong> Saves up to 40% water by delivering water directly to the plant root zones, minimizing evaporation.</li>
+                                    <li><strong>Weather-based Planning:</strong> Delay watering crops if precipitation of >=50% is forecast in the next 48 hours to conserve resources.</li>
+                                    <li><strong>Mulching:</strong> Spread dry leaves, straw, or mulch film on the soil to block direct sunlight and preserve moisture.</li>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guide 2 -->
+                    <div class="accordion-item bg-dark text-light border-secondary">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed bg-dark text-light border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="fas fa-leaf text-success me-2"></i> 
+                                {% if lang_pref == 'te' %}భూసార రక్షణ & ఎరువులు (Soil Health){% else %}Soil Health & Fertilization Guidelines{% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#knowledgeAccordion">
+                            <div class="accordion-body text-light-secondary small">
+                                {% if lang_pref == 'te' %}
+                                <ul>
+                                    <li><strong>భూసార పరీక్ష:</strong> ప్రతి 2 సంవత్సరాలకు ఒకసారి మట్టి పరీక్షలు చేయించి లోపించిన పోషకాలను మాత్రమే వేయండి.</li>
+                                    <li><strong>పంట మార్పిడి:</strong> ఏకధాటిగా ఒకే పంట వేయకుండా లెగ్యూమ్ జాతి (చిక్కుడు, మినుము) పంటలను మార్చి వేయడం ద్వారా నత్రజని సహజంగా పెరుగుతుంది.</li>
+                                    <li><strong>పచ్చిరొట్ట ఎరువులు:</strong> జనుము లేదా జీలుగ పంటలను పూత దశలో మట్టిలో దున్నడం వల్ల భూమికి సేంద్రీయ కర్బనం లభిస్తుంది.</li>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <li><strong>Soil Testing:</strong> Get your farm soil tested once in 2 years to apply exact macro/micronutrients needed, reducing waste.</li>
+                                    <li><strong>Crop Rotation:</strong> Avoid growing the same crop continuously. Rotate with nitrogen-fixing legume crops (pulses, beans) to replenish soil naturally.</li>
+                                    <li><strong>Green Manure:</strong> Grow crops like Sunnhemp or Dhaincha and plow them back into the soil at the flowering stage to boost organic carbon content.</li>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guide 3 -->
+                    <div class="accordion-item bg-dark text-light border-secondary">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed bg-dark text-light border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <i class="fas fa-shield-alt text-danger me-2"></i> 
+                                {% if lang_pref == 'te' %}సమగ్ర సస్యరక్షణ విధానం (Pest & Disease Control){% else %}Integrated Pest Management (IPM){% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#knowledgeAccordion">
+                            <div class="accordion-body text-light-secondary small">
+                                {% if lang_pref == 'te' %}
+                                <ul>
+                                    <li><strong>జీవ నియంత్రణ:</strong> హానికర పురుగులను నివారించడానికి ట్రైకోగ్రామా కార్డులు లేదా పరాన్నజీవులను వాడండి.</li>
+                                    <li><strong>జిగురు బోర్డులు:</strong> రసం పీల్చే పురుగులను ఆకర్షించడానికి పసుపు, నీలి రంగు జిగురు బోర్డులను పొలంలో అమర్చండి.</li>
+                                    <li><strong>వేప కషాయం:</strong> ప్రారంభ దశలో 5% వేప గింజల కషాయం (Neem Seed Kernel Extract) పిచికారీ చేయడం వల్ల ఖర్చు తగ్గుతుంది.</li>
+                                </ul>
+                                {% else %}
+                                <ul>
+                                    <li><strong>Biological Controls:</strong> Introduce beneficial insect predators (like Trichogramma cards) to control caterpillar pests naturally.</li>
+                                    <li><strong>Sticky Traps:</strong> Install yellow sticky traps (for whiteflies/aphids) and blue sticky traps (for thrips) at crop height.</li>
+                                    <li><strong>Neem Seed Extract:</strong> Spray 5% Neem Seed Kernel Extract (NSKE) at the early stages of infestation to repel pests without toxic chemicals.</li>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple offline banner handler
+        window.addEventListener('online', () => {
+            document.getElementById('offline-banner').style.display = 'none';
+        });
+        window.addEventListener('offline', () => {
+            document.getElementById('offline-banner').style.display = 'block';
+        });
+        if (!navigator.onLine) {
+            document.getElementById('offline-banner').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

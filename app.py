@@ -88,12 +88,12 @@ def inject_farmer():
         # Create a default small farmer
         farmer = Farmer(
             id=farmer_id,
-            name="రామయ్య (Ramayya)",
-            village_mandal="Guntur",
-            land_size_acres=3.0,
-            primary_crop="Paddy",
+            name="",
+            village_mandal="",
+            land_size_acres=0.0,
+            primary_crop="",
             category="small_marginal",
-            language="te",
+            language="en",
             voice_enabled=True
         )
         storage_service.save_farmer(farmer)
@@ -114,7 +114,7 @@ def inject_farmer():
     }
     
     en_translations = {
-        "title": "Rythu Mitra AI",
+        "title": "Farmer Assistant AI",
         "home": "Home",
         "diagnose": "Diagnose",
         "advisory": "Advisories",
@@ -133,6 +133,10 @@ def inject_farmer():
 # --- ROUTES ---
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/dashboard')
 def index():
     return render_template('index.html')
 

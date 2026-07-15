@@ -1,5 +1,5 @@
 class Farmer:
-    def __init__(self, id, name, village_mandal, land_size_acres, primary_crop, category="small_marginal", language="te", voice_enabled=True):
+    def __init__(self, id, name, village_mandal, land_size_acres, primary_crop, category="small_marginal", language="en", voice_enabled=True):
         self.id = id
         self.name = name
         self.village_mandal = village_mandal
@@ -36,6 +36,6 @@ class Farmer:
             land_size_acres=data.get("land_size_acres", 0.0),
             primary_crop=data.get("primary_crop", ""),
             category=data.get("category", "small_marginal"),
-            language=data.get("language", "te"),
+            language=data.get("language", "en"),
             voice_enabled=data.get("voice_enabled", True)
         )
