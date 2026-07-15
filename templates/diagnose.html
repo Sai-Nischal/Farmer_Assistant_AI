@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.diagnose }} - {{ ui.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
+
+    <!-- Offline Banner -->
+    <div class="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="/" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>{{ ui.diagnose }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container">
+        <!-- Image uploading step -->
+        <div id="upload-section">
+            <div class="farmer-card text-center">
+                <div class="card-body-custom">
+                    <div class="capture-box" id="capture-box">
+                        <i class="fas fa-camera-retro"></i>
+                        <h4>
+                            {% if lang_pref == 'te' %}
+                            మొక్క లేదా ఆకు ఫోటో తీయండి
+                            {% else %}
+                            Take Leaf Photo
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted small">
+                            {% if lang_pref == 'te' %}
+                            మొబైల్ కెమెరా ఉపయోగించండి లేదా గ్యాలరీ నుండి అప్‌లోడ్ చేయండి
+                            {% else %}
+                            Tap to open camera or upload from gallery
+                            {% endif %}
+                        </p>
+                        <input type="file" id="leaf-image-input" accept="image/*" capture="environment" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanning progress state -->
+        <div class="loader-wrapper" id="loader-wrapper">
+            <div class="analyzing-leaf">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <h3>
+                {% if lang_pref == 'te' %}
+                ఫోటోను విశ్లేషిస్తున్నాము...
+                {% else %}
+                Analyzing leaf details...
+                {% endif %}
+            </h3>
+            <p class="text-muted">
+                {% if lang_pref == 'te' %}
+                దయచేసి వేచి ఉండండి, నెట్‌వర్క్ వేగాన్ని బట్టి కొద్ది సమయం పట్టవచ్చు.
+                {% else %}
+                Processing image parameters on Gemini AI.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Result details card -->
+        <div id="result-section" style="display: none;">
+            <div class="farmer-card">
+                <div class="card-header-custom">
+                    <span><i class="fas fa-microscope"></i> 
+                        {% if lang_pref == 'te' %}నిర్ధారణ నివేదిక (Diagnosis){% else %}Diagnosis Report{% endif %}
+                    </span>
+                    <button class="btn btn-sm btn-outline-light" id="play-advisory-voice" style="display: none; min-height: 38px;">
+                        <i class="fas fa-volume-up"></i> వినండి (Listen)
+                    </button>
+                </div>
+                <div class="card-body-custom">
+                    <table class="table table-dark table-borderless small mb-3">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%;">{% if lang_pref == 'te' %}పంట రకం:{% else %}Crop Type:{% endif %}</th>
+                                <td id="res-crop" class="text-success font-weight-bold">Paddy</td>
+                            </tr>
+                            <tr>
+                                <th>{% if lang_pref == 'te' %}అనుమానిత వ్యాధి:{% else %}Condition:{% endif %}</th>
+                                <td id="res-condition">Blast Disease</td>
+                            </tr>
+                            <tr>
+                                <th>{% if lang_pref == 'te' %}నమ్మకమైన శాతం:{% else %}Confidence:{% endif %}</th>
+                                <td>
+                                    <span id="res-confidence-val">0%</span>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div id="res-confidence-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="mt-4 mb-2"><i class="fas fa-list-ul text-warning"></i> {% if lang_pref == 'te' %}గమనించిన లక్షణాలు (Symptoms):{% else %}Observed Symptoms:{% endif %}</h5>
+                    <p id="res-symptoms" class="text-light-secondary small bg-dark p-2 rounded"></p>
+
+                    <!-- Treatment Tabs -->
+                    <h5 class="mt-4 mb-2"><i class="fas fa-medkit text-success"></i> {% if lang_pref == 'te' %}చికిత్స మార్గదర్శకాలు (Treatments):{% else %}Treatment Guidelines:{% endif %}</h5>
+                    <ul class="nav nav-tabs bg-dark border-0 rounded p-1 mb-2" id="treatmentTabs" role="tablist">
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link active text-light w-100 border-0" id="organic-tab" data-bs-toggle="tab" data-bs-target="#organic" type="button" role="tab">
+                                {% if lang_pref == 'te' %}సేంద్రీయ (Organic){% else %}Organic{% endif %}
+                            </button>
+                        </li>
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link text-light w-100 border-0" id="chemical-tab" data-bs-toggle="tab" data-bs-target="#chemical" type="button" role="tab">
+                                {% if lang_pref == 'te' %}రసాయన (Chemical){% else %}Chemical{% endif %}
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content bg-dark p-3 rounded mb-3 small text-light-secondary" id="treatmentTabContent">
+                        <div class="tab-pane fade show active" id="organic" role="tabpanel" aria-labelledby="organic-tab">
+                            <p id="res-organic"></p>
+                        </div>
+                        <div class="tab-pane fade" id="chemical" role="tabpanel" aria-labelledby="chemical-tab">
+                            <p id="res-chemical"></p>
+                        </div>
+                    </div>
+
+                    <!-- Weather spray/irrigate flags -->
+                    <h5 class="mt-4 mb-2"><i class="fas fa-cloud-sun text-info"></i> {% if lang_pref == 'te' %}వాతావరణ ఆధారిత సలహా (Weather Alert):{% else %}Weather Advisory:{% endif %}</h5>
+                    <div class="p-3 bg-dark rounded small text-light-secondary">
+                        <p class="mb-2"><strong>{% if lang_pref == 'te' %}నీటి తడులు:{% else %}Irrigation:{% endif %}</strong> <span id="res-irrigation"></span></p>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <strong>{% if lang_pref == 'te' %}పిచికారీ స్థితి:{% else %}Spraying Status:{% endif %}</strong>
+                            <span id="res-spray-badge" class="status-badge status-yellow">Caution</span>
+                        </div>
+                        <p class="mb-0" id="res-spray"></p>
+                    </div>
+
+                    <!-- Action Escalate buttons -->
+                    <div class="mt-4 d-flex gap-2">
+                        <a href="/diagnose" class="btn btn-secondary-custom flex-fill">
+                            <i class="fas fa-redo"></i> {% if lang_pref == 'te' %}మరో ఫోటో తీయండి{% else %}Retry Capture{% endif %}
+                        </a>
+                        <button id="escalate-rbk-btn" class="btn btn-primary-custom flex-fill">
+                            <i class="fas fa-headset"></i> {% if lang_pref == 'te' %}అధికారి సహాయం{% else %}Ask RBK Expert{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <a href="/diagnose">
+            <i class="fas fa-camera"></i>
+            <span>{{ ui.diagnose }}</span>
+        </a>
+        <a href="/advisory">
+            <i class="fas fa-cloud-sun"></i>
+            <span>{{ ui.advisory }}</span>
+        </a>
+        <a href="/schemes">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>{{ ui.schemes }}</span>
+        </a>
+        <a href="/history">
+            <i class="fas fa-history"></i>
+            <span>{{ ui.history }}</span>
+        </a>
+        <a href="/settings">
+            <i class="fas fa-cog"></i>
+            <span>{{ ui.settings }}</span>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/diagnose.js"></script>
+</body>
+</html>

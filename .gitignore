@@ -1,0 +1,20 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Storage / Temp files
+data/farmers.json
+data/diagnosis_history.json
+data/weather_cache.json
+static/uploads/

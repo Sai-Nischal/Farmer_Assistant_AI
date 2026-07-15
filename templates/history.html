@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.history }} - {{ ui.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
+
+    <!-- Offline Banner -->
+    <div class="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="/" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>{{ ui.history }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container">
+        <h5 class="mb-3 text-light-secondary"><i class="fas fa-history text-accent-gold"></i> 
+            {% if lang_pref == 'te' %}గత నివేదికల చరిత్ర (Saved Records){% else %}Past Diagnosis History{% endif %}
+        </h5>
+
+        {% if history|length == 0 %}
+        <div class="alert alert-secondary bg-dark border-secondary text-light text-center" role="alert">
+            <p class="mb-2">
+                {% if lang_pref == 'te' %}
+                మీరు ఇంకా ఎలాంటి పంట తెగుళ్ల నిర్ధారణ చేయలేదు.
+                {% else %}
+                No previous crop diagnoses found in history.
+                {% endif %}
+            </p>
+            <a href="/diagnose" class="btn btn-sm btn-primary-custom mt-2">
+                <i class="fas fa-camera"></i> {% if lang_pref == 'te' %}ఇప్పుడే ఫోటో తీయండి{% else %}Diagnose Now{% endif %}
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Timeline of diagnoses -->
+        {% for record in history %}
+        <div class="farmer-card mb-3">
+            <div class="card-header-custom" style="background-color: var(--primary-dark); font-size: 14px;">
+                <span><i class="far fa-calendar-alt text-accent-gold"></i> {{ record.date[:10] }}</span>
+                <span class="badge bg-secondary font-weight-bold">ID: {{ record.id }}</span>
+            </div>
+            <div class="card-body-custom">
+                <div class="row align-items-center">
+                    <!-- Photo preview if uploaded -->
+                    <div class="col-4">
+                        {% if record.image_path %}
+                        <img src="{{ record.image_path }}" class="img-fluid rounded border border-secondary" alt="Crop Leaf" style="max-height: 90px; object-fit: cover; width: 100%;">
+                        {% else %}
+                        <div class="bg-dark text-center py-3 rounded border border-secondary">
+                            <i class="fas fa-leaf text-success" style="font-size: 28px;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- Diagnosis properties -->
+                    <div class="col-8 small">
+                        <p class="mb-1 text-light"><strong>{% if lang_pref == 'te' %}పంట రకం:{% else %}Crop:{% endif %}</strong> {{ record.crop_type }}</p>
+                        <p class="mb-1 text-accent-gold"><strong>{% if lang_pref == 'te' %}లక్షణ వ్యాధి:{% else %}Condition:{% endif %}</strong> {{ record.likely_condition }}</p>
+                        <p class="mb-0 text-muted"><strong>{% if lang_pref == 'te' %}నమ్మకమైన శాతం:{% else %}Confidence:{% endif %}</strong> {{ record.confidence }}%</p>
+                    </div>
+                </div>
+
+                <!-- Accordion details for treatments -->
+                <div class="accordion accordion-flush bg-dark rounded mt-3" id="accordionHistory{{ record.id }}">
+                    <div class="accordion-item bg-transparent border-0">
+                        <h2 class="accordion-header bg-transparent" id="headingHist{{ record.id }}">
+                            <button class="accordion-button collapsed bg-transparent text-light border-0 small py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHist{{ record.id }}" style="box-shadow: none;">
+                                <i class="fas fa-prescription-bottle text-success me-2"></i> 
+                                {% if lang_pref == 'te' %}నివారణ చర్యలు చూడండి (View Remedy){% else %}View Remedy Instructions{% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapseHist{{ record.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionHistory{{ record.id }}">
+                            <div class="accordion-body text-light-secondary small pt-1 pb-3 px-3">
+                                <p class="mb-2 text-success font-weight-bold"><strong>{% if lang_pref == 'te' %}సేంద్రీయ చికిత్స (Organic):{% else %}Organic Remedy:{% endif %}</strong></p>
+                                <p class="mb-3">{{ record.organic_treatment }}</p>
+                                <p class="mb-2 text-warning font-weight-bold"><strong>{% if lang_pref == 'te' %}రసాయన చికిత్స (Chemical):{% else %}Chemical Remedy:{% endif %}</strong></p>
+                                <p class="mb-0">{{ record.chemical_treatment }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <a href="/diagnose">
+            <i class="fas fa-camera"></i>
+            <span>{{ ui.diagnose }}</span>
+        </a>
+        <a href="/advisory">
+            <i class="fas fa-cloud-sun"></i>
+            <span>{{ ui.advisory }}</span>
+        </a>
+        <a href="/schemes">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>{{ ui.schemes }}</span>
+        </a>
+        <a href="/history">
+            <i class="fas fa-history"></i>
+            <span>{{ ui.history }}</span>
+        </a>
+        <a href="/settings">
+            <i class="fas fa-cog"></i>
+            <span>{{ ui.settings }}</span>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

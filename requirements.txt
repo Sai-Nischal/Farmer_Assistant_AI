@@ -1,0 +1,8 @@
+Flask
+google-genai
+google-adk
+gTTS
+requests
+python-dotenv
+gunicorn
+Pillow

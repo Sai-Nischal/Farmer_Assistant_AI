@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.advisory }} - {{ ui.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
+
+    <!-- Offline Banner -->
+    <div class="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="/" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>{{ ui.advisory }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container">
+        <!-- Weather Strip (Today + Next 2 days) -->
+        <h5 class="mb-3 text-light-secondary"><i class="fas fa-cloud"></i> 
+            {% if lang_pref == 'te' %}వాతావరణ సూచన ({{ weather.location }}){% else %}Weather Forecast ({{ weather.location }}){% endif %}
+        </h5>
+        <div class="weather-strip">
+            {% for day in weather.days %}
+            <div class="weather-day">
+                <p class="small text-accent-gold mb-1">
+                    {% if loop.index == 1 %}
+                        {% if lang_pref == 'te' %}నేడు (Today){% else %}Today{% endif %}
+                    {% else %}
+                        {{ day.date }}
+                    {% endif %}
+                </p>
+                <i class="fas {% if day.precipitation_probability >= 50 %}fa-cloud-showers-heavy text-info{% elif day.precipitation_probability >= 20 %}fa-cloud text-secondary{% else %}fa-sun text-warning{% endif %} mb-2" style="font-size: 24px;"></i>
+                <p class="mb-0 fw-bold small">{{ day.temp_max }}°C / {{ day.temp_min }}°C</p>
+                <p class="small text-muted mb-0" style="font-size: 11px;">
+                    <i class="fas fa-umbrella"></i> {{ day.precipitation_probability }}%
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sprayed safe limits -->
+        <div class="farmer-card">
+            <div class="card-header-custom">
+                <span><i class="fas fa-wind"></i> 
+                    {% if lang_pref == 'te' %}నిర్ణయ సూచీలు (Spraying & Irrigation){% else %}Spraying & Irrigation Decision{% endif %}
+                </span>
+            </div>
+            <div class="card-body-custom">
+                <!-- Spray Indicator -->
+                <div class="mb-4">
+                    <h6>
+                        {% if lang_pref == 'te' %}మందు పిచికారీ చేయడానికి అనువైన సమయమా?{% else %}Is it safe to spray chemical inputs today?{% endif %}
+                    </h6>
+                    {% set today_rain = weather.days[0].precipitation_probability %}
+                    {% set today_wind = weather.days[0].wind_speed_max %}
+                    
+                    {% if today_rain >= 40 %}
+                        <span class="status-badge status-red"><i class="fas fa-exclamation-triangle"></i> {% if lang_pref == 'te' %}పిచికారీ చేయవద్దు (Rain Risk){% else %}Do Not Spray (Rain Expected){% endif %}</span>
+                        <p class="text-muted small mt-2">
+                            {% if lang_pref == 'te' %}ఈరోజు వర్షం పడే అవకాశం {{ today_rain }}% ఉంది. మందు కడిగిపోతుంది.{% else %}High probability of rain ({{ today_rain }}%). Chemicals will wash off.{% endif %}
+                        </p>
+                    {% elif today_wind >= 15 %}
+                        <span class="status-badge status-yellow"><i class="fas fa-wind"></i> {% if lang_pref == 'te' %}జాగ్రత్త (High Wind){% else %}Caution (Windy){% endif %}</span>
+                        <p class="text-muted small mt-2">
+                            {% if lang_pref == 'te' %}గాలి వేగం గంటకు {{ today_wind }} కి.మీ దాటవచ్చు. మందు గాలికి కొట్టుకుపోయే ప్రమాదం ఉంది.{% else %}High wind speeds ({{ today_wind }} km/h). Spray drift risk.{% endif %}
+                        </p>
+                    {% else %}
+                        <span class="status-badge status-green"><i class="fas fa-check-circle"></i> {% if lang_pref == 'te' %}అనుకూలం (Safe to Spray){% else %}Safe to Spray Today{% endif %}</span>
+                        <p class="text-muted small mt-2">
+                            {% if lang_pref == 'te' %}వాతావరణం ప్రశాంతంగా ఉంది. తక్కువ గాలి మరియు వర్ష సూచన లేదు.{% else %}Weather conditions are calm. Rain risk is minimal.{% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Irrigation Indicator -->
+                <div>
+                    <h6>
+                        {% if lang_pref == 'te' %}నీటి తడులు పెట్టవచ్చా?{% else %}Should you irrigate today?{% endif %}
+                    </h6>
+                    {% set rain_risk_3day = 0 %}
+                    {% for day in weather.days %}
+                        {% if day.precipitation_probability > rain_risk_3day %}
+                            {% set rain_risk_3day = day.precipitation_probability %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if rain_risk_3day >= 50 %}
+                        <span class="status-badge status-red"><i class="fas fa-cloud-showers-water"></i> {% if lang_pref == 'te' %}నీటి తడులు ఆపండి (Delay Irrigation){% else %}Delay Irrigation (Rain Expected){% endif %}</span>
+                        <p class="text-muted small mt-2">
+                            {% if lang_pref == 'te' %}రాబోయే మూడు రోజుల్లో వర్షం కురిసే అవకాశం ఎక్కువగా ఉంది. నీటి తడులు వేయడం ఆపండి.{% else %}Rain is expected within the next 3 days. Save water and prevent waterlogging.{% endif %}
+                        </p>
+                    {% else %}
+                        <span class="status-badge status-green"><i class="fas fa-tint"></i> {% if lang_pref == 'te' %}తడులు వేయవచ్చు (Irrigate){% else %}Safe to Irrigate{% endif %}</span>
+                        <p class="text-muted small mt-2">
+                            {% if lang_pref == 'te' %}భూమిలో తేమ శాతాన్ని బట్టి సాధారణ తడులు వేయండి. వర్ష సూచన లేదు.{% else %}No significant rainfall forecast. Go ahead with normal irrigation cycles.{% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Diagnosis Advisory review -->
+        {% if latest_diag %}
+        <div class="farmer-card">
+            <div class="card-header-custom">
+                <span><i class="fas fa-stethoscope"></i> 
+                    {% if lang_pref == 'te' %}చివరిగా నిర్ధారించిన తెగులు సలహా{% else %}Advisory for Last Diagnosis{% endif %}
+                </span>
+            </div>
+            <div class="card-body-custom small text-light-secondary">
+                <p><strong>{% if lang_pref == 'te' %}పంట రకం & తెగులు:{% else %}Crop & Disease:{% endif %}</strong> {{ latest_diag.crop_type }} - {{ latest_diag.likely_condition }}</p>
+                <p><strong>{% if lang_pref == 'te' %}లక్షణాలు:{% else %}Symptoms Observed:{% endif %}</strong> {{ latest_diag.symptoms }}</p>
+                <div class="p-2 bg-dark rounded mb-2">
+                    <p class="mb-1 text-success"><strong>{% if lang_pref == 'te' %}సేంద్రీయ చికిత్స:{% else %}Organic Remedy:{% endif %}</strong></p>
+                    <p>{{ latest_diag.organic_treatment }}</p>
+                </div>
+                <div class="p-2 bg-dark rounded">
+                    <p class="mb-1 text-warning"><strong>{% if lang_pref == 'te' %}రసాయన చికిత్స (జాగ్రత్తగా వాడండి):{% else %}Chemical Remedy:{% endif %}</strong></p>
+                    <p>{{ latest_diag.chemical_treatment }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <a href="/diagnose">
+            <i class="fas fa-camera"></i>
+            <span>{{ ui.diagnose }}</span>
+        </a>
+        <a href="/advisory">
+            <i class="fas fa-cloud-sun"></i>
+            <span>{{ ui.advisory }}</span>
+        </a>
+        <a href="/schemes">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>{{ ui.schemes }}</span>
+        </a>
+        <a href="/history">
+            <i class="fas fa-history"></i>
+            <span>{{ ui.history }}</span>
+        </a>
+        <a href="/settings">
+            <i class="fas fa-cog"></i>
+            <span>{{ ui.settings }}</span>
+        </a>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

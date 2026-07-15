@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.settings }} - {{ ui.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
+
+    <!-- Offline Banner -->
+    <div class="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="/" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>{{ ui.settings }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container">
+        <!-- Settings Form Card -->
+        <div class="farmer-card">
+            
+            <!-- Premium Profile Avatar Header -->
+            <div class="profile-avatar-container">
+                <div class="profile-avatar">
+                    {% if current_farmer.name %}
+                        {{ current_farmer.name[0] }}
+                    {% else %}
+                        R
+                    {% endif %}
+                    <div class="profile-avatar-badge">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+                <h2 class="profile-name-title">{{ current_farmer.name }}</h2>
+                <p class="profile-subtitle">
+                    <i class="fas fa-map-marker-alt" style="color: var(--accent-gold); margin-right: 4px;"></i> {{ current_farmer.village_mandal }} &bull; 
+                    {% if lang_pref == 'te' %}{{ current_farmer.land_size_acres }} ఎకరాలు{% else %}{{ current_farmer.land_size_acres }} Acres{% endif %}
+                </p>
+            </div>
+
+            <div class="card-body-custom">
+                <form action="/settings" method="POST">
+                    
+                    <!-- Section 1: Personal Information -->
+                    <div class="form-section-card">
+                        <div class="form-section-title">
+                            <i class="fas fa-user"></i>
+                            {% if lang_pref == 'te' %}వ్యక్తిగత వివరాలు{% else %}Personal Details{% endif %}
+                        </div>
+                        
+                        <!-- Farmer Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}రైతు పేరు (Farmer Name):{% else %}Farmer Name:{% endif %}
+                            </label>
+                            <input type="text" class="form-control form-control-premium" id="name" name="name" value="{{ current_farmer.name }}" required>
+                        </div>
+
+                        <!-- Village / Mandal -->
+                        <div class="mb-3">
+                            <label for="village_mandal" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}గ్రామం / మండలం (Village/Mandal):{% else %}Village / Mandal:{% endif %}
+                            </label>
+                            <select class="form-select form-select-premium" id="village_mandal" name="village_mandal" required>
+                                <option value="Guntur" {% if current_farmer.village_mandal == 'Guntur' %}selected{% endif %}>Guntur (గుంటూరు)</option>
+                                <option value="Anantapur" {% if current_farmer.village_mandal == 'Anantapur' %}selected{% endif %}>Anantapur (అనంతపురం)</option>
+                                <option value="Nellore" {% if current_farmer.village_mandal == 'Nellore' %}selected{% endif %}>Nellore (నెల్లూరు)</option>
+                                <option value="Kurnool" {% if current_farmer.village_mandal == 'Kurnool' %}selected{% endif %}>Kurnool (కర్నూలు)</option>
+                                <option value="Visakhapatnam" {% if current_farmer.village_mandal == 'Visakhapatnam' %}selected{% endif %}>Visakhapatnam (విశాఖపట్నం)</option>
+                                <option value="Vijayawada" {% if current_farmer.village_mandal == 'Vijayawada' %}selected{% endif %}>Vijayawada (విజయవాడ)</option>
+                                <option value="Kadapa" {% if current_farmer.village_mandal == 'Kadapa' %}selected{% endif %}>Kadapa (కడప)</option>
+                                <option value="Tirupati" {% if current_farmer.village_mandal == 'Tirupati' %}selected{% endif %}>Tirupati (తిరుపతి)</option>
+                                <option value="Kakinada" {% if current_farmer.village_mandal == 'Kakinada' %}selected{% endif %}>Kakinada (కాకినాడ)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Farm Details -->
+                    <div class="form-section-card">
+                        <div class="form-section-title">
+                            <i class="fas fa-seedling"></i>
+                            {% if lang_pref == 'te' %}వ్యవసాయ వివరాలు{% else %}Farm Details{% endif %}
+                        </div>
+
+                        <!-- Land Size -->
+                        <div class="mb-3">
+                            <label for="land_size_acres" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}భూమి పరిమాణం ఎకరాలలో (Land in Acres):{% else %}Land Size (Acres):{% endif %}
+                            </label>
+                            <input type="number" step="0.1" class="form-control form-control-premium" id="land_size_acres" name="land_size_acres" value="{{ current_farmer.land_size_acres }}" required>
+                        </div>
+
+                        <!-- Primary Crop -->
+                        <div class="mb-3">
+                            <label for="primary_crop" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}ముఖ్యమైన పంట (Primary Crop):{% else %}Primary Crop:{% endif %}
+                            </label>
+                            <select class="form-select form-select-premium" id="primary_crop" name="primary_crop" required>
+                                <option value="Paddy" {% if current_farmer.primary_crop == 'Paddy' %}selected{% endif %}>Paddy / వరి</option>
+                                <option value="Cotton" {% if current_farmer.primary_crop == 'Cotton' %}selected{% endif %}>Cotton / పత్తి</option>
+                                <option value="Chilli" {% if current_farmer.primary_crop == 'Chilli' %}selected{% endif %}>Chilli / మిరప</option>
+                                <option value="Tomato" {% if current_farmer.primary_crop == 'Tomato' %}selected{% endif %}>Tomato / టమోటా</option>
+                                <option value="Groundnut" {% if current_farmer.primary_crop == 'Groundnut' %}selected{% endif %}>Groundnut / వేరుశనగ</option>
+                                <option value="Organic Crops" {% if current_farmer.primary_crop == 'Organic Crops' %}selected{% endif %}>Organic Crops / సేంద్రీయ పంటలు</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Preferences -->
+                    <div class="form-section-card">
+                        <div class="form-section-title">
+                            <i class="fas fa-sliders-h"></i>
+                            {% if lang_pref == 'te' %}యాప్ ప్రాధాన్యతలు{% else %}App Settings{% endif %}
+                        </div>
+
+                        <!-- Language Preference -->
+                        <div class="mb-3">
+                            <label for="language" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}భాషా ప్రాధాన్యత (Preferred Language):{% else %}Language Preference:{% endif %}
+                            </label>
+                            <select class="form-select form-select-premium" id="language" name="language" required>
+                                <option value="te" {% if current_farmer.language == 'te' %}selected{% endif %}>తెలుగు (Telugu)</option>
+                                <option value="en" {% if current_farmer.language == 'en' %}selected{% endif %}>English</option>
+                            </select>
+                        </div>
+
+                        <!-- Voice Mode toggle -->
+                        <div class="form-check form-switch form-switch-premium">
+                            <label class="form-check-input-label text-light small" for="voice_enabled">
+                                {% if lang_pref == 'te' %}సలహాలను బిగ్గరగా చదవండి (Voice Replies){% else %}Read Back Advisories (TTS Voice){% endif %}
+                            </label>
+                            <input class="form-check-input" type="checkbox" id="voice_enabled" name="voice_enabled" {% if current_farmer.voice_enabled %}checked{% endif %}>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Developer Config Section (Easter Egg: Tap Profile Avatar 5 times to reveal) -->
+                    <div id="developer-config-section" class="form-section-card {% if not api_key_override %}d-none{% endif %}">
+                        <div class="form-section-title" style="color: var(--accent-gold);">
+                            <i class="fas fa-key"></i> Developer Admin Config
+                        </div>
+                        <div class="mb-3">
+                            <label for="gemini_api_key" class="form-premium-label small text-muted">Google Gemini API Key:</label>
+                            <input type="password" class="form-control form-control-premium" id="gemini_api_key" name="gemini_api_key" value="{{ api_key_override }}" placeholder="AIzaSy...">
+                            <span class="text-muted" style="font-size: 11px;">Leave empty to use server default environment variable.</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-premium-save w-100 mt-2">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i> {% if lang_pref == 'te' %}వివరాలు సేవ్ చేయండి{% else %}Save Profile{% endif %}
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <a href="/diagnose">
+            <i class="fas fa-camera"></i>
+            <span>{{ ui.diagnose }}</span>
+        </a>
+        <a href="/advisory">
+            <i class="fas fa-cloud-sun"></i>
+            <span>{{ ui.advisory }}</span>
+        </a>
+        <a href="/schemes">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>{{ ui.schemes }}</span>
+        </a>
+        <a href="/history">
+            <i class="fas fa-history"></i>
+            <span>{{ ui.history }}</span>
+        </a>
+        <a href="/settings">
+            <i class="fas fa-cog"></i>
+            <span>{{ ui.settings }}</span>
+        </a>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatar = document.querySelector('.profile-avatar');
+            const devSection = document.getElementById('developer-config-section');
+            let tapCount = 0;
+            let tapTimeout;
+
+            if (avatar && devSection) {
+                // If a key override already exists, auto-reveal the dev section so they can see/edit it
+                const keyInput = document.getElementById('gemini_api_key');
+                if (keyInput && keyInput.value.trim() !== '') {
+                    devSection.classList.remove('d-none');
+                }
+
+                avatar.style.cursor = 'pointer';
+                avatar.addEventListener('click', function() {
+                    tapCount++;
+                    clearTimeout(tapTimeout);
+
+                    if (tapCount >= 5) {
+                        devSection.classList.toggle('d-none');
+                        if (!devSection.classList.contains('d-none')) {
+                            devSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                        tapCount = 0;
+                    } else {
+                        tapTimeout = setTimeout(() => {
+                            tapCount = 0;
+                        }, 2000);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

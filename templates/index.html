@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.title }}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/style.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#1b4332">
+</head>
+<body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
+
+    <!-- Offline Notification Banner -->
+    <div class="offline-banner" id="offline-banner">
+        <i class="fas fa-wifi-slash"></i> {{ ui.offline_banner }}
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <h1><i class="fas fa-seedling"></i> {{ ui.title }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container">
+        <!-- Profile summary card -->
+        <div class="farmer-card">
+            <div class="card-header-custom">
+                <span><i class="fas fa-user-circle"></i> {{ current_farmer.name }}</span>
+                <span class="badge bg-dark">{{ current_farmer.village_mandal }}</span>
+            </div>
+            <div class="card-body-custom">
+                <p class="mb-1" style="color: var(--text-secondary);">
+                    {% if lang_pref == 'te' %}
+                    ముఖ్యమైన పంట: <strong>{{ current_farmer.primary_crop }}</strong> | భూమి పరిమాణం: <strong>{{ current_farmer.land_size_acres }} ఎకరాలు</strong>
+                    {% else %}
+                    Primary Crop: <strong>{{ current_farmer.primary_crop }}</strong> | Land: <strong>{{ current_farmer.land_size_acres }} Acres</strong>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Big Diagnosis Action Card -->
+        <div class="farmer-card text-center p-4">
+            <h3 class="mb-3">
+                {% if lang_pref == 'te' %}
+                పంట తెగులు ఉచిత నిర్ధారణ
+                {% else %}
+                Free Crop Disease Diagnosis
+                {% endif %}
+            </h3>
+            <a href="/diagnose" class="btn btn-large-tap btn-primary-custom mb-2">
+                <i class="fas fa-camera"></i> {{ ui.photo_btn }}
+            </a>
+            <p class="small text-muted mt-2">
+                {% if lang_pref == 'te' %}
+                ఆకు ఫోటోను అప్‌లోడ్ చేసి క్షణాల్లో వ్యాధి వివరాలు పొందండి.
+                {% else %}
+                Take or upload a leaf photo to get immediate diagnosis.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Conversational Helper Box -->
+        <div class="farmer-card">
+            <div class="card-header-custom bg-dark text-light">
+                <span><i class="fas fa-comment-dots"></i> 
+                    {% if lang_pref == 'te' %}
+                    మిత్ర సహాయకుడు (Rythu Mitra Chat)
+                    {% else %}
+                    Agricultural Helper
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body-custom">
+                <!-- Dialogue History -->
+                <div class="chat-box" id="chat-messages">
+                    <div class="chat-msg chat-msg-bot">
+                        {% if lang_pref == 'te' %}
+                        నమస్కారం! నేను రైతు మిత్ర సహాయకుడిని. మీకు పంట తెగుళ్లు, వాతావరణం, లేదా ప్రభుత్వ పథకాల గురించి ఏమైనా సందేహాలు ఉన్నాయా? అడగండి!
+                        {% else %}
+                        Welcome! I am your agricultural advisor assistant. Ask me questions about crops, weather warnings, or eligibility for government schemes.
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Input elements -->
+                <form id="chat-form" class="d-flex gap-2">
+                    <input type="text" id="chat-query-input" class="form-control bg-dark text-light border-secondary" 
+                           placeholder="{% if lang_pref == 'te' %}ఇక్కడ టైప్ చేయండి...{% else %}Ask a question...{% endif %}" required>
+                    <button type="submit" class="btn btn-primary-custom" style="min-width: 50px;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Recording Float button -->
+    <div class="voice-assistant">
+        <button class="btn-voice" id="btn-voice" title="{{ ui.voice_btn }}">
+            <i class="fas fa-microphone"></i>
+        </button>
+    </div>
+
+    <!-- Bottom Nav bar -->
+    <div class="bottom-nav">
+        <a href="/diagnose">
+            <i class="fas fa-camera"></i>
+            <span>{{ ui.diagnose }}</span>
+        </a>
+        <a href="/advisory">
+            <i class="fas fa-cloud-sun"></i>
+            <span>{{ ui.advisory }}</span>
+        </a>
+        <a href="/schemes">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>{{ ui.schemes }}</span>
+        </a>
+        <a href="/history">
+            <i class="fas fa-history"></i>
+            <span>{{ ui.history }}</span>
+        </a>
+        <a href="/settings">
+            <i class="fas fa-cog"></i>
+            <span>{{ ui.settings }}</span>
+        </a>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/voice.js"></script>
+</body>
+</html>

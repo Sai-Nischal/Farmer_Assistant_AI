@@ -1,0 +1,257 @@
+[
+  {
+    "id": "ysr_rythu_bharosa",
+    "name_en": "AP Rythu Bharosa",
+    "name_te": "వైఎస్ఆర్ రైతు భరోసా",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "small_marginal",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "Financial assistance of Rs. 13,500 per year (including Rs. 6,000 from PM-KISAN) in three installments for crop cultivation.",
+    "benefit_te": "పంట సాగు కోసం మూడు విడతల్లో ఏటా రూ. 13,500 ఆర్థిక సహాయం (PM-KISAN నుండి రూ. 6,000 కలిపి) అందించబడుతుంది.",
+    "apply_link": "https://rythubharosa.ap.gov.in/",
+    "how_to_apply_en": "Apply through the local Rythu Bharosa Kendra (RBK) with land record documents (Pattadar Passbook), Aadhaar card, and bank details.",
+    "how_to_apply_te": "పట్టాదారు పాస్ బుక్, ఆధార్ కార్డ్ మరియు బ్యాంక్ వివరాలతో స్థానిక రైతు భరోసా కేంద్రం (RBK) ద్వారా దరఖాస్తు చేసుకోండి."
+  },
+  {
+    "id": "pm_kisan",
+    "name_en": "PM-KISAN Samman Nidhi",
+    "name_te": "పీఎం కిసాన్ సమ్మాన్ నిధి",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "small_marginal",
+      "state": "All"
+    },
+    "benefit_en": "Direct income support of Rs. 6,000 per year in three equal installments of Rs. 2,000 each to small and marginal farmer families.",
+    "benefit_te": "చిన్న మరియు సన్నకారు రైతు కుటుంబాలకు ఏటా రూ. 6,000 ఆర్థిక సహాయం 3 విడతలలో నేరుగా వారి బ్యాంక్ ఖాతాలో జమ చేయబడుతుంది.",
+    "apply_link": "https://pmkisan.gov.in/",
+    "how_to_apply_en": "Register online via PM-KISAN portal or visit the nearest Common Service Centre (CSC) / RBK.",
+    "how_to_apply_te": "పీఎం కిసాన్ పోర్టల్ ద్వారా ఆన్‌లైన్‌లో నమోదు చేసుకోండి లేదా సమీప కామన్ సర్వీస్ సెంటర్ (CSC) / RBKని సందర్శించండి."
+  },
+  {
+    "id": "ysr_free_crop_insurance",
+    "name_en": "AP Free Crop Insurance Scheme",
+    "name_te": "వైఎస్ఆర్ ఉచిత పంటల బీమా పథకం",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 25.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "100% premium paid by state government. Farmers get crop insurance coverage for losses due to drought, floods, or pests.",
+    "benefit_te": "100% ప్రీమియం రాష్ట్ర ప్రభుత్వమే చెల్లిస్తుంది. కరవు, వరదలు లేదా తెగుళ్ల వల్ల పంట నష్టపోయినప్పుడు రైతులకు బీమా పరిహారం లభిస్తుంది.",
+    "apply_link": "https://karifinsurance.ap.gov.in/",
+    "how_to_apply_en": "Automatic enrollment when crop booking is done through e-Crop registration in AP.",
+    "how_to_apply_te": "ఆంధ్రప్రదేశ్‌లో ఇ-క్రాప్ (e-Crop) రిజిస్ట్రేషన్ ద్వారా పంట నమోదు చేసుకున్నప్పుడు ఆటోమేటిక్‌గా నమోదు అవుతుంది."
+  },
+  {
+    "id": "kisan_credit_card",
+    "name_en": "Kisan Credit Card (KCC)",
+    "name_te": "కిసాన్ క్రెడిట్ కార్డ్ (KCC)",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 100.0,
+      "min_land_acres": 0.1,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Access to timely credit for crop production at low interest rates (4% effective interest rate with prompt repayment incentive).",
+    "benefit_te": "తక్కువ వడ్డీ రేట్లకు (సకాలంలో చెల్లిస్తే 4% వడ్డీ రేటుతో) పంట సాగు కొరకు బ్యాంకుల నుండి సులభమైన రుణాలు లభిస్తాయి.",
+    "apply_link": "https://www.sbi.co.in/",
+    "how_to_apply_en": "Apply at any commercial bank, cooperative bank, or regional rural bank with land title deeds.",
+    "how_to_apply_te": "భూమి యాజమాన్య పత్రాలతో ఏదైనా వాణిజ్య బ్యాంకు, సహకార బ్యాంకు లేదా గ్రామీణ బ్యాంకులో దరఖాస్తు చేసుకోండి."
+  },
+  {
+    "id": "ysr_sunna_vaddi",
+    "name_en": "YSR Sunna Vaddi Panta Runalu",
+    "name_te": "వైఎస్ఆర్ సున్నా వడ్డీ పంట రుణాలు",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "small_marginal",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "100% interest subsidy on crop loans up to Rs. 1 lakh if repaid within one year.",
+    "benefit_te": "రూ. 1 లక్ష వరకు తీసుకున్న పంట రుణాలను ఒక సంవత్సరంలోపు తిరిగి చెల్లిస్తే వడ్డీ పూర్తిగా ప్రభుత్వమే భరిస్తుంది.",
+    "apply_link": "http://apagrisnet.ap.gov.in/",
+    "how_to_apply_en": "Automatic interest waiver credited to the farmer's bank account upon timely repayment of crop loan to banks.",
+    "how_to_apply_te": "బ్యాంకులకు పంట రుణాన్ని సకాలంలో తిరిగి చెల్లించినప్పుడు రైతు బ్యాంక్ ఖాతాకు నేరుగా వడ్డీ రాయితీ జమ చేయబడుతుంది."
+  },
+  {
+    "id": "soil_health_card",
+    "name_en": "Soil Health Card Scheme",
+    "name_te": "సాయిల్ హెల్త్ కార్డ్ పథకం",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 100.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Free soil testing and report listing nutrient status of soil, along with recommended fertilizer dosages.",
+    "benefit_te": "ఉచిత మట్టి పరీక్షలు మరియు మట్టిలోని పోషకాల స్థాయిని తెలిపే నివేదికతో పాటు సరైన ఎరువుల వాడకంపై సిఫార్సులు లభిస్తాయి.",
+    "apply_link": "https://soilhealth.dac.gov.in/",
+    "how_to_apply_en": "Submit soil samples to the nearest soil testing lab or request local agriculture assistant / RBK to collect.",
+    "how_to_apply_te": "సమీప మట్టి పరీక్షా ల్యాబ్‌కు మట్టి నమూనాలను సమర్పించండి లేదా సేకరించమని స్థానిక వ్యవసాయ సహాయకుడు / RBK ని కోరండి."
+  },
+  {
+    "id": "pm_krishi_sinchayee",
+    "name_en": "PM Krishi Sinchayee Yojana (Micro Irrigation)",
+    "name_te": "పీఎం కృషి సించాయీ యోజన (సూక్ష్మ నీటి పారుదల)",
+    "category": "Horticulture",
+    "eligibility": {
+      "max_land_acres": 12.5,
+      "min_land_acres": 0.5,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Up to 90% subsidy for drip and sprinkler irrigation systems for small and marginal farmers, and 70% for others.",
+    "benefit_te": "చిన్న మరియు సన్నకారు రైతులకు బిందు (డ్రిప్) మరియు తుంపర (స్ప్రింక్లర్) నీటి పారుదల వ్యవస్థలపై 90% వరకు రాయితీ, ఇతరులకు 70% రాయితీ లభిస్తుంది.",
+    "apply_link": "https://pmksy.gov.in/",
+    "how_to_apply_en": "Apply online through the AP Micro Irrigation Project (APMIP) portal or visit the local Horticulture Office / RBK.",
+    "how_to_apply_te": "APMIP పోర్టల్ ద్వారా ఆన్‌లైన్‌లో దరఖాస్తు చేసుకోండి లేదా స్థానిక ఉద్యానవన కార్యాలయం / RBK ని సందర్శించండి."
+  },
+  {
+    "id": "ysr_jala_kala",
+    "name_en": "YSR Jala Kala",
+    "name_te": "వైఎస్ఆర్ జలకళ",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 2.5,
+      "farmer_type": "small_marginal",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "Free drilling of borewells along with feasibility survey and free motors/pumpsets to eligible small and marginal farmers.",
+    "benefit_te": "అర్హులైన చిన్న మరియు సన్నకారు రైతులకు ఉచితంగా బోరుబావుల తవ్వకం మరియు ఉచిత విద్యుత్ మోటార్లు/పంపుసెట్లు అందజేయబడతాయి.",
+    "apply_link": "https://ysrjalakala.ap.gov.in/",
+    "how_to_apply_en": "Apply online through YSR Jala Kala portal or submit a physical application at the Grama Sachivalayam / RBK.",
+    "how_to_apply_te": "వైఎస్ఆర్ జలకళ పోర్టల్ ద్వారా ఆన్‌లైన్‌లో దరఖాస్తు చేసుకోండి లేదా గ్రామ సచివాలయం / RBK లో దరఖాస్తు పత్రాన్ని సమర్పించండి."
+  },
+  {
+    "id": "pm_kisan_maandhan",
+    "name_en": "PM Kisan Maan-Dhan Yojana (PM-KMY)",
+    "name_te": "పీఎం కిసాన్ మాన్-ధన్ యోజన",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "small_marginal",
+      "state": "All"
+    },
+    "benefit_en": "Assured monthly pension of Rs. 3,000 upon reaching 60 years of age, with a monthly contribution of Rs. 55 to Rs. 200 based on entry age (18-40 years).",
+    "benefit_te": "60 ఏళ్లు నిండిన తర్వాత నెలకు రూ. 3,000 పెన్షన్ లభిస్తుంది. ప్రవేశ వయస్సు (18-40 ఏళ్లు) బట్టి నెలకు రూ. 55 నుండి రూ. 200 వరకు ప్రీమియం చెల్లించాలి.",
+    "apply_link": "https://maandhan.in/",
+    "how_to_apply_en": "Enroll online via PM-KMY portal or register at the nearest Common Service Centre (CSC).",
+    "how_to_apply_te": "PM-KMY పోర్టల్ ద్వారా ఆన్‌లైన్‌లో నమోదు చేసుకోండి లేదా సమీప కామన్ సర్వీస్ సెంటర్ (CSC) వద్ద నమోదు చేసుకోండి."
+  },
+  {
+    "id": "ysr_rythu_yantra",
+    "name_en": "AP Rythu Yantra Seva Scheme",
+    "name_te": "వైఎస్ఆర్ రైతు యంత్ర సేవా పథకం",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 15.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "40% subsidy and 50% bank loan support for establishing Custom Hiring Centers (CHCs) for agricultural machinery and tractors.",
+    "benefit_te": "వ్యవసాయ యంత్రాలు మరియు ట్రాక్టర్లను రైతులకు అందుబాటులో ఉంచే కస్టమ్ హైరింగ్ సెంటర్ల (CHCs) ఏర్పాటుకు 40% సబ్సిడీ మరియు 50% బ్యాంకు రుణం లభిస్తుంది.",
+    "apply_link": "http://apagrisnet.ap.gov.in/",
+    "how_to_apply_en": "Apply through the local Agricultural Officer or submit proposals via the community groups formed at the RBK level.",
+    "how_to_apply_te": "స్థానిక వ్యవసాయ అధికారి ద్వారా దరఖాస్తు చేసుకోండి లేదా RBK స్థాయిలోని రైతు సంఘాల గ్రూపుల ద్వారా ప్రతిపాదనలను సమర్పించండి."
+  },
+  {
+    "id": "seed_subsidy",
+    "name_en": "AP Seed Subsidy Scheme",
+    "name_te": "ఆంధ్రప్రదేశ్ విత్తన రాయితీ పథకం",
+    "category": "Paddy",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "small_marginal",
+      "state": "Andhra Pradesh"
+    },
+    "benefit_en": "Subsidized distribution of certified crop seeds (Paddy, Groundnut, Pulses) ranging from 30% to 50% discount on market price.",
+    "benefit_te": "ధ్రువీకరించిన విత్తనాలపై (వరి, వేరుశనగ, పప్పుధాన్యాలు) మార్కెట్ ధరపై 30% నుండి 50% వరకు సబ్సిడీతో విత్తనాలు పంపిణీ చేయబడతాయి.",
+    "apply_link": "http://apagrisnet.ap.gov.in/",
+    "how_to_apply_en": "Register details during the Kharif/Rabi seasons at the RBK to get biometric authentication-based subsidized seeds.",
+    "how_to_apply_te": "ఖరీఫ్/రబీ సీజన్లలో బయోమెట్రిక్ ఆధారిత సబ్సిడీ విత్తనాలు పొందడానికి స్థానిక RBK లో నమోదు చేసుకోండి."
+  },
+  {
+    "id": "paramparagat_krishi",
+    "name_en": "Paramparagat Krishi Vikas Yojana (Organic)",
+    "name_te": "పరంపరాగత్ కృషి వికాస్ యోజన (సేంద్రీయ సాగు)",
+    "category": "Organic Crops",
+    "eligibility": {
+      "max_land_acres": 5.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Assistance of Rs. 50,000 per hectare for 3 years, of which Rs. 31,000 is directly provided for organic inputs, seeds, and certification.",
+    "benefit_te": "సేంద్రీయ సాగు కొరకు 3 సంవత్సరాల పాటు హెక్టారుకు రూ. 50,000 ఆర్థిక సాయం అందుతుంది. ఇందులో రూ. 31,000 నేరుగా సేంద్రీయ ఇన్‌పుట్‌లు, విత్తనాలు మరియు సర్టిఫికేషన్ కోసం లభిస్తుంది.",
+    "apply_link": "https://pgsindia-ncof.gov.in/",
+    "how_to_apply_en": "Form a cluster of at least 20-50 farmers and apply to the District Agricultural Officer.",
+    "how_to_apply_te": "కనీసం 20-50 మంది రైతులతో ఒక గ్రూప్/క్లస్టర్ ఏర్పాటు చేసుకుని జిల్లా వ్యవసాయ అధికారికి దరఖాస్తు చేసుకోండి."
+  },
+  {
+    "id": "horticulture_subsidy",
+    "name_en": "National Horticulture Mission (NHM)",
+    "name_te": "జాతీయ ఉద్యానవన మిషన్ (NHM)",
+    "category": "Horticulture",
+    "eligibility": {
+      "max_land_acres": 10.0,
+      "min_land_acres": 0.5,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Financial assistance (40% to 50% subsidy) for establishing new orchards, post-harvest units, cold storage, and greenhouses.",
+    "benefit_te": "నూతన తోటల పెంపకం, కోత అనంతర మౌలిక వసతులు, కోల్డ్ స్టోరేజ్ మరియు గ్రీన్ హౌస్ ల ఏర్పాటుకు 40% నుండి 50% వరకు రాయితీ లభిస్తుంది.",
+    "apply_link": "https://midh.gov.in/",
+    "how_to_apply_en": "Submit application along with land records, cultivation plan, and project proposal to the local Horticulture Officer / RBK.",
+    "how_to_apply_te": "స్థానిక ఉద్యాన అధికారికి భూమి పత్రాలు, సాగు ప్రణాళిక మరియు ప్రాజెక్ట్ ప్రతిపాదనలతో దరఖాస్తు చేసుకోండి."
+  },
+  {
+    "id": "agricultural_mechanization",
+    "name_en": "Sub-Mission on Agricultural Mechanization (SMAM)",
+    "name_te": "వ్యవసాయ యాంత్రీకరణ సబ్-మిషన్ (SMAM)",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 25.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Subsidy of 40% to 50% on purchase of farm equipment like power tillers, rotavators, sprayers, and harvesters.",
+    "benefit_te": "పవర్ టిల్లర్లు, రోటవేటర్లు, స్ప్రేయర్లు మరియు హార్వెస్టర్లు వంటి వ్యవసాయ పరికరాల కొనుగోలుపై 40% నుండి 50% వరకు రాయితీ లభిస్తుంది.",
+    "apply_link": "https://agrimachinery.nic.in/",
+    "how_to_apply_en": "Register on the central SMAM portal with land details, bank passbook, and select certified dealer to buy equipment.",
+    "how_to_apply_te": "భూమి వివరాలు, బ్యాంక్ పాస్ బుక్ తో సెంట్రల్ SMAM పోర్టల్ లో నమోదు చేసుకోండి మరియు పరికరాలు కొనుగోలు చేయడానికి డీలర్ ని ఎంచుకోండి."
+  },
+  {
+    "id": "pm_fasal_bima",
+    "name_en": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "name_te": "ప్రధాన మంత్రి ఫసల్ బీమా యోజన",
+    "category": "All Crops",
+    "eligibility": {
+      "max_land_acres": 50.0,
+      "min_land_acres": 0.0,
+      "farmer_type": "all",
+      "state": "All"
+    },
+    "benefit_en": "Crop insurance covering pre-sowing to post-harvest risks at minimal premiums (2% for Kharif, 1.5% for Rabi crops).",
+    "benefit_te": "అత్యంత తక్కువ ప్రీమియంతో (ఖరీఫ్ కు 2%, రబీ పంటలకు 1.5%) విత్తనం వేసినప్పటి నుండి పంట కోత వరకు ఉన్న నష్టాలకు భద్రత కల్పిస్తుంది.",
+    "apply_link": "https://pmfby.gov.in/",
+    "how_to_apply_en": "Apply through bank where crop loan is active, online via PMFBY portal, or through designated CSCs.",
+    "how_to_apply_te": "పంట రుణం ఉన్న బ్యాంకు ద్వారా లేదా ఆన్‌లైన్‌లో PMFBY పోర్టల్ ద్వారా లేదా CSCల ద్వారా దరఖాస్తు చేసుకోండి."
+  }
+]
