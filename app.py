@@ -59,6 +59,8 @@ try:
 
     # Configure upload folder
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+    if os.environ.get("VERCEL"):
+        UPLOAD_FOLDER = "/tmp/uploads"
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -367,6 +369,22 @@ def api_voice_input():
     except Exception as e:
         logging.error(f"Voice transcription failed: {e}")
         return jsonify({"error": f"Transcription error: {str(e)}"}), 500
+
+from flask import send_from_directory
+
+@app.route('/static/uploads/<path:filename>')
+def serve_upload(filename):
+    static_path = os.path.join(app.root_path, 'static', 'uploads', filename)
+    if os.path.exists(static_path):
+        return send_from_directory(os.path.join(app.root_path, 'static', 'uploads'), filename)
+    return send_from_directory('/tmp/uploads', filename)
+
+@app.route('/static/audio/<path:filename>')
+def serve_audio(filename):
+    static_path = os.path.join(app.root_path, 'static', 'audio', filename)
+    if os.path.exists(static_path):
+        return send_from_directory(os.path.join(app.root_path, 'static', 'audio'), filename)
+    return send_from_directory('/tmp/audio', filename)
 
 if __name__ == '__main__':
     # Generate mock data for testing if files are empty

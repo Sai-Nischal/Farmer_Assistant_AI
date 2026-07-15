@@ -5,7 +5,10 @@ from gtts import gTTS
 
 class TTSService:
     def __init__(self):
-        self.audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "audio")
+        if os.environ.get("VERCEL") or not os.access(os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"), os.W_OK):
+            self.audio_dir = "/tmp/audio"
+        else:
+            self.audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "audio")
         os.makedirs(self.audio_dir, exist_ok=True)
 
     def text_to_speech(self, text, lang='te'):

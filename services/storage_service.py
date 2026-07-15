@@ -6,7 +6,12 @@ from models.scheme import Scheme
 
 class StorageService:
     def __init__(self):
-        self.data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        self.original_data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        if os.environ.get("VERCEL"):
+            self.data_dir = "/tmp/data"
+        else:
+            self.data_dir = self.original_data_dir
+            
         self.farmers_file = os.path.join(self.data_dir, "farmers.json")
         self.history_file = os.path.join(self.data_dir, "diagnosis_history.json")
         self.schemes_file = os.path.join(self.data_dir, "schemes.json")
@@ -17,6 +22,22 @@ class StorageService:
 
     def _read_json(self, filepath, default_val):
         if not os.path.exists(filepath):
+            # Check if we can copy from the original read-only directory
+            filename = os.path.basename(filepath)
+            original_path = os.path.join(self.original_data_dir, filename)
+            if os.path.exists(original_path):
+                try:
+                    import shutil
+                    shutil.copy2(original_path, filepath)
+                except Exception:
+                    # Fallback to reading directly from original_path (read-only)
+                    try:
+                        with open(original_path, 'r', encoding='utf-8') as f:
+                            return json.load(f)
+                    except Exception:
+                        pass
+            
+            # If not copied, write default and return
             self._write_json(filepath, default_val)
             return default_val
         try:
