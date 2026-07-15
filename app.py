@@ -1,63 +1,74 @@
-import os
-import uuid
+import sys
 import logging
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-# Setup Logging
+# Set up logging early
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "rythu_mitra_ai_secure_dev_key")
+try:
+    import os
+    import uuid
+    from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+    from werkzeug.utils import secure_filename
+    from dotenv import load_dotenv
 
-# Import models, services and agents
-from models.farmer import Farmer
-from services.storage_service import StorageService
-from services.gemini_service import GeminiService
-from services.weather_service import WeatherService
-from services.tts_service import TTSService
+    # Load environment variables
+    load_dotenv()
 
-from agents.multilingual_agent import MultilingualAgent
-from agents.diagnosis_agent import DiagnosisAgent
-from agents.weather_agent import WeatherAgent
-from agents.advisory_agent import AdvisoryAgent
-from agents.scheme_agent import SchemeAgent
-from agents.fallback_agent import FallbackAgent
-from agents.conversation_agent import ConversationAgent
+    app = Flask(__name__)
+    app.secret_key = os.environ.get("SECRET_KEY", "rythu_mitra_ai_secure_dev_key")
 
-# Initialize Services
-storage_service = StorageService()
-gemini_service = GeminiService()
-weather_service = WeatherService(storage_service)
-tts_service = TTSService()
+    # Import models, services and agents
+    from models.farmer import Farmer
+    from services.storage_service import StorageService
+    from services.gemini_service import GeminiService
+    from services.weather_service import WeatherService
+    from services.tts_service import TTSService
 
-# Initialize Agents
-multilingual_agent = MultilingualAgent(gemini_service)
-diagnosis_agent = DiagnosisAgent(gemini_service)
-weather_agent = WeatherAgent(weather_service)
-advisory_agent = AdvisoryAgent(gemini_service)
-scheme_agent = SchemeAgent(storage_service, gemini_service)
-fallback_agent = FallbackAgent()
+    from agents.multilingual_agent import MultilingualAgent
+    from agents.diagnosis_agent import DiagnosisAgent
+    from agents.weather_agent import WeatherAgent
+    from agents.advisory_agent import AdvisoryAgent
+    from agents.scheme_agent import SchemeAgent
+    from agents.fallback_agent import FallbackAgent
+    from agents.conversation_agent import ConversationAgent
 
-conversation_agent = ConversationAgent(
-    storage_service=storage_service,
-    gemini_service=gemini_service,
-    multilingual_agent=multilingual_agent,
-    diagnosis_agent=diagnosis_agent,
-    weather_agent=weather_agent,
-    advisory_agent=advisory_agent,
-    scheme_agent=scheme_agent,
-    fallback_agent=fallback_agent
-)
+    # Initialize Services
+    storage_service = StorageService()
+    gemini_service = GeminiService()
+    weather_service = WeatherService(storage_service)
+    tts_service = TTSService()
 
-# Configure upload folder
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    # Initialize Agents
+    multilingual_agent = MultilingualAgent(gemini_service)
+    diagnosis_agent = DiagnosisAgent(gemini_service)
+    weather_agent = WeatherAgent(weather_service)
+    advisory_agent = AdvisoryAgent(gemini_service)
+    scheme_agent = SchemeAgent(storage_service, gemini_service)
+    fallback_agent = FallbackAgent()
+
+    conversation_agent = ConversationAgent(
+        storage_service=storage_service,
+        gemini_service=gemini_service,
+        multilingual_agent=multilingual_agent,
+        diagnosis_agent=diagnosis_agent,
+        weather_agent=weather_agent,
+        advisory_agent=advisory_agent,
+        scheme_agent=scheme_agent,
+        fallback_agent=fallback_agent
+    )
+
+    # Configure upload folder
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+except Exception as e:
+    import traceback
+    print("----- START TRACEBACK -----", file=sys.stderr, flush=True)
+    for line in traceback.format_exc().splitlines():
+        print(line, file=sys.stderr, flush=True)
+    print("----- END TRACEBACK -----", file=sys.stderr, flush=True)
+    raise e
 
 # Helper to get active user ID
 def get_current_farmer_id():

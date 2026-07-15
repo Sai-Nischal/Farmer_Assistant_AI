@@ -5,7 +5,7 @@ from models.farmer import Farmer
 try:
     from google.adk.agents import Agent as ADKAgent
     HAS_ADK = True
-except ImportError:
+except Exception:
     HAS_ADK = False
 
 class SchemeAgent:
