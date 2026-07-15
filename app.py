@@ -1,21 +1,22 @@
 import sys
 import logging
+import os
+from flask import Flask
 
 # Set up logging early
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "rythu_mitra_ai_secure_dev_key")
+
 try:
-    import os
     import uuid
-    from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+    from flask import render_template, request, jsonify, session, redirect, url_for
     from werkzeug.utils import secure_filename
     from dotenv import load_dotenv
 
     # Load environment variables
     load_dotenv()
-
-    app = Flask(__name__)
-    app.secret_key = os.environ.get("SECRET_KEY", "rythu_mitra_ai_secure_dev_key")
 
     # Import models, services and agents
     from models.farmer import Farmer
