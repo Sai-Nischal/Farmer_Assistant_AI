@@ -40,6 +40,7 @@ app.wsgi_app = VercelWSGIMiddleware(app.wsgi_app)
 
 # Catch-all route that manually dispatches based on x-vercel-original-url
 # This works even if middleware doesn't run in time for routing
+@app.route('/api/index', defaults={'subpath': ''})
 @app.route('/api/index/', defaults={'subpath': ''})
 @app.route('/api/index/<path:subpath>')
 def vercel_dispatch(subpath):
