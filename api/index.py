@@ -8,8 +8,47 @@ if root_dir not in sys.path:
 
 from app import app
 
-# The path fix is now handled in app.py via @app.before_request
-# This is more reliable than WSGI middleware for Vercel
+class VercelWSGIMiddleware:
+    """
+    WSGI middleware to fix Vercel serverless rewrite PATH_INFO behavior.
+    Runs BEFORE Flask routing, so it can fix the path in time.
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        # Get the original path from Vercel headers
+        # Vercel sets x-vercel-original-url header with the full original URL
+        original_url = environ.get('HTTP_X_VERCEL_ORIGINAL_URL')
+
+        if original_url:
+            from urllib.parse import urlparse
+            parsed = urlparse(original_url)
+            path = parsed.path
+
+            # Remove query string
+            if '?' in path:
+                path = path.split('?')[0]
+
+            if path and path != '/':
+                environ['PATH_INFO'] = path
+        else:
+            # Fallback: check x-vercel-path header
+            vercel_path = environ.get('HTTP_X_VERCEL_PATH')
+            if vercel_path:
+                environ['PATH_INFO'] = vercel_path
+            else:
+                # Final fallback: fix /api/index prefix
+                path_info = environ.get('PATH_INFO', '')
+                if path_info == '/api/index':
+                    environ['PATH_INFO'] = '/'
+                elif path_info.startswith('/api/index/'):
+                    environ['PATH_INFO'] = path_info[len('/api/index'):]
+
+        return self.wsgi_app(environ, start_response)
+
+# Apply the middleware BEFORE any routes are processed
+app.wsgi_app = VercelWSGIMiddleware(app.wsgi_app)
 
 # Simple test endpoint to verify routing works
 from flask import jsonify, request

@@ -168,47 +168,6 @@ def inject_farmer():
     return dict(current_farmer=farmer, lang_pref=farmer.language, ui=translations, is_logged_in=is_logged_in)
 
 
-# --- VERCEL PATH FIX (before_request) ---
-@app.before_request
-def fix_vercel_path():
-    """
-    Fix PATH_INFO for Vercel serverless deployments.
-    Vercel rewrites all requests to /api/index but provides original path in headers.
-    """
-    from urllib.parse import urlparse
-
-    # Get the original path from Vercel headers
-    # Vercel provides x-vercel-original-url header with the full original URL
-    original_url = request.headers.get('x-vercel-original-url')
-
-    if original_url:
-        # Parse the URL to get just the path
-        parsed = urlparse(original_url)
-        path = parsed.path
-
-        # Remove query string if present
-        if '?' in path:
-            path = path.split('?')[0]
-
-        # Update the request path for Flask routing
-        # We need to modify the underlying WSGI environ
-        request.environ['PATH_INFO'] = path
-        return
-
-    # Fallback: try x-vercel-path header
-    vercel_path = request.headers.get('x-vercel-path')
-    if vercel_path:
-        request.environ['PATH_INFO'] = vercel_path
-        return
-
-    # Fallback: if PATH_INFO is /api/index or starts with /api/index/, fix it
-    path_info = request.environ.get('PATH_INFO', '')
-    if path_info == '/api/index':
-        request.environ['PATH_INFO'] = '/'
-    elif path_info.startswith('/api/index/'):
-        request.environ['PATH_INFO'] = path_info[len('/api/index'):]
-
-
 # --- ROUTES ---
 
 @app.route('/')
