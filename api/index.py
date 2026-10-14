@@ -16,16 +16,28 @@ class VercelWSGIMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # DEBUG: Log all relevant headers to see what Vercel sends
-        print(f"[VERCEL DEBUG] PATH_INFO: {environ.get('PATH_INFO')}", file=sys.stderr)
-        print(f"[VERCEL DEBUG] REQUEST_URI: {environ.get('REQUEST_URI')}", file=sys.stderr)
-        print(f"[VERCEL DEBUG] HTTP_X_FORWARDED_URI: {environ.get('HTTP_X_FORWARDED_URI')}", file=sys.stderr)
-        print(f"[VERCEL DEBUG] HTTP_X_VERCEL_ORIGINAL_URL: {environ.get('HTTP_X_VERCEL_ORIGINAL_URL')}", file=sys.stderr)
-        print(f"[VERCEL DEBUG] RAW_URI: {environ.get('RAW_URI')}", file=sys.stderr)
+        # DEBUG: Log ALL headers that might contain the original path
+        debug_headers = [
+            'PATH_INFO', 'REQUEST_URI', 'HTTP_X_FORWARDED_URI',
+            'HTTP_X_VERCEL_ORIGINAL_URL', 'RAW_URI', 'HTTP_X_VERCEL_PATH',
+            'HTTP_X_VERCEL_DEPLOYMENT_URL', 'ORIGINAL_URI', 'HTTP_X_ORIGINAL_URL',
+            'HTTP_X_REWRITE_URL', 'HTTP_X_URL_SCHEME', 'SERVER_PROTOCOL'
+        ]
+        for h in debug_headers:
+            val = environ.get(h)
+            if val:
+                print(f"[VERCEL DEBUG] {h}: {val}", file=sys.stderr)
 
         # Vercel provides the original path in several places.
-        # The most reliable for Flask is often the REQUEST_URI or X-Forwarded-Uri.
-        path = environ.get('REQUEST_URI') or environ.get('HTTP_X_FORWARDED_URI') or environ.get('HTTP_X_VERCEL_ORIGINAL_URL') or environ.get('PATH_INFO')
+        # Try all known headers in order of reliability
+        path = (environ.get('HTTP_X_VERCEL_ORIGINAL_URL') or
+                environ.get('HTTP_X_VERCEL_PATH') or
+                environ.get('REQUEST_URI') or
+                environ.get('HTTP_X_FORWARDED_URI') or
+                environ.get('ORIGINAL_URI') or
+                environ.get('HTTP_X_ORIGINAL_URL') or
+                environ.get('HTTP_X_REWRITE_URL') or
+                environ.get('PATH_INFO'))
 
         if path:
             # 1. Strip query strings
