@@ -7,6 +7,7 @@ if root_dir not in sys.path:
     sys.path.insert(0, root_dir)
 
 from app import app
+from flask import jsonify, request, redirect
 
 class VercelWSGIMiddleware:
     """
@@ -50,9 +51,17 @@ class VercelWSGIMiddleware:
 # Apply the middleware BEFORE any routes are processed
 app.wsgi_app = VercelWSGIMiddleware(app.wsgi_app)
 
-# Simple test endpoint to verify routing works
-from flask import jsonify, request
+# Catch-all route for Vercel's /api/index/<path> rewrite
+# This handles cases where the middleware doesn't run in time
+@app.route('/api/index/')
+@app.route('/api/index/<path:subpath>')
+def vercel_catch_all(subpath=''):
+    """Redirect /api/index/* to the actual route"""
+    if subpath:
+        return redirect('/' + subpath)
+    return redirect('/')
 
+# Simple test endpoint to verify routing works
 @app.route('/api/test-path')
 def test_path():
     return jsonify({
