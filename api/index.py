@@ -16,17 +16,11 @@ class VercelWSGIMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # DEBUG: Log ALL headers that might contain the original path
-        debug_headers = [
-            'PATH_INFO', 'REQUEST_URI', 'HTTP_X_FORWARDED_URI',
-            'HTTP_X_VERCEL_ORIGINAL_URL', 'RAW_URI', 'HTTP_X_VERCEL_PATH',
-            'HTTP_X_VERCEL_DEPLOYMENT_URL', 'ORIGINAL_URI', 'HTTP_X_ORIGINAL_URL',
-            'HTTP_X_REWRITE_URL', 'HTTP_X_URL_SCHEME', 'SERVER_PROTOCOL'
-        ]
-        for h in debug_headers:
-            val = environ.get(h)
-            if val:
-                print(f"[VERCEL DEBUG] {h}: {val}", file=sys.stderr)
+        # DEBUG: Log ALL environ keys that look like headers/URLs
+        print(f"[VERCEL DEBUG] === REQUEST START ===", file=sys.stderr)
+        for key, val in environ.items():
+            if any(k in key.upper() for k in ['PATH', 'URI', 'URL', 'FORWARD', 'ORIGINAL', 'VERCEL', 'REWRITE', 'HOST', 'SERVER']):
+                print(f"[VERCEL DEBUG] {key}: {val}", file=sys.stderr)
 
         # Vercel provides the original path in several places.
         # Try all known headers in order of reliability
@@ -66,6 +60,7 @@ class VercelWSGIMiddleware:
         if environ.get('PATH_INFO') == '/api/index':
             environ['PATH_INFO'] = '/'
 
+        print(f"[VERCEL DEBUG] === REQUEST END ===", file=sys.stderr)
         return self.wsgi_app(environ, start_response)
 
 app.wsgi_app = VercelWSGIMiddleware(app.wsgi_app)
