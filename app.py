@@ -7,7 +7,12 @@ from flask import Flask
 # Set up logging early
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
 app.secret_key = os.environ.get("SECRET_KEY") or "change-me-in-production"
 app.config['CHAT_LIMIT_PER_DAY'] = int(os.environ.get('CHAT_LIMIT_PER_DAY', '20'))
 app.config['TEMPLATES_AUTO_RELOAD'] = True

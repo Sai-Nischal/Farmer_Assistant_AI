@@ -1,8 +1,14 @@
 {
+  "version": 2,
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/app.py"
+      "destination": "/api/index"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "templates/**,static/**,data/**"
+    }
+  }
 }
