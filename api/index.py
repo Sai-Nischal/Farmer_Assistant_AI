@@ -11,31 +11,33 @@ from app import app
 class VercelWSGIMiddleware:
     """
     WSGI middleware to fix Vercel serverless rewrite PATH_INFO behavior.
-    When Vercel rewrites requests to /api/index, PATH_INFO can be set to /api/index
-    or omit the client-requested route. This middleware inspects original URI headers
-    and restores the correct route for Flask.
     """
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # 1. Check for original request path in Vercel headers / environ
-        req_uri = (
-            environ.get('HTTP_X_FORWARDED_URI') or 
-            environ.get('RAW_URI') or 
-            environ.get('REQUEST_URI')
-        )
-        if req_uri:
-            path_only = req_uri.split('?')[0]
-            if path_only and path_only != '/api/index':
-                environ['PATH_INFO'] = path_only
+        # Recover original path from Vercel headers
+        path = environ.get('HTTP_X_FORWARDED_URI') or environ.get('REQUEST_URI')
 
-        # 2. If PATH_INFO is still /api/index, point to root /
-        path = environ.get('PATH_INFO', '')
-        if path in ('/api/index', '/api/index/'):
+        if path:
+            # If full URL, extract path only
+            if '://' in path:
+                parts = path.split('/', 3)
+                path = parts[3] if len(parts) > 3 else '/'
+                if not path.startswith('/'):
+                    path = '/' + path
+
+            # Remove the destination prefix so Flask sees the actual route
+            path = path.replace('/api/index', '', 1)
+
+            if not path or path == '':
+                path = '/'
+
+            environ['PATH_INFO'] = path
+
+        # Final safety: if it's still the function path, route to root
+        if environ.get('PATH_INFO') == '/api/index':
             environ['PATH_INFO'] = '/'
-        elif path.startswith('/api/index/'):
-            environ['PATH_INFO'] = path[len('/api/index'):]
 
         return self.wsgi_app(environ, start_response)
 
