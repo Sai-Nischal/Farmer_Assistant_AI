@@ -16,9 +16,16 @@ class VercelWSGIMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
+        # DEBUG: Log all relevant headers to see what Vercel sends
+        print(f"[VERCEL DEBUG] PATH_INFO: {environ.get('PATH_INFO')}", file=sys.stderr)
+        print(f"[VERCEL DEBUG] REQUEST_URI: {environ.get('REQUEST_URI')}", file=sys.stderr)
+        print(f"[VERCEL DEBUG] HTTP_X_FORWARDED_URI: {environ.get('HTTP_X_FORWARDED_URI')}", file=sys.stderr)
+        print(f"[VERCEL DEBUG] HTTP_X_VERCEL_ORIGINAL_URL: {environ.get('HTTP_X_VERCEL_ORIGINAL_URL')}", file=sys.stderr)
+        print(f"[VERCEL DEBUG] RAW_URI: {environ.get('RAW_URI')}", file=sys.stderr)
+
         # Vercel provides the original path in several places.
         # The most reliable for Flask is often the REQUEST_URI or X-Forwarded-Uri.
-        path = environ.get('REQUEST_URI') or environ.get('HTTP_X_FORWARDED_URI') or environ.get('PATH_INFO')
+        path = environ.get('REQUEST_URI') or environ.get('HTTP_X_FORWARDED_URI') or environ.get('HTTP_X_VERCEL_ORIGINAL_URL') or environ.get('PATH_INFO')
 
         if path:
             # 1. Strip query strings
@@ -41,6 +48,7 @@ class VercelWSGIMiddleware:
                 path = '/' + path
 
             environ['PATH_INFO'] = path
+            print(f"[VERCEL DEBUG] FINAL PATH_INFO: {path}", file=sys.stderr)
 
         # Final check: if Flask still sees /api/index, force it to root
         if environ.get('PATH_INFO') == '/api/index':
