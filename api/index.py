@@ -16,14 +16,10 @@ class VercelWSGIMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # DEBUG: Log ALL environ keys that look like headers/URLs
-        print(f"[VERCEL DEBUG] === REQUEST START ===", file=sys.stderr)
-        for key, val in environ.items():
-            if any(k in key.upper() for k in ['PATH', 'URI', 'URL', 'FORWARD', 'ORIGINAL', 'VERCEL', 'REWRITE', 'HOST', 'SERVER']):
-                print(f"[VERCEL DEBUG] {key}: {val}", file=sys.stderr)
+        # DIAGNOSTIC: Add a custom header to verify middleware runs
+        original_path = environ.get('PATH_INFO', 'UNKNOWN')
 
-        # Vercel provides the original path in several places.
-        # Try all known headers in order of reliability
+        # Try to get the original path from Vercel headers
         path = (environ.get('HTTP_X_VERCEL_ORIGINAL_URL') or
                 environ.get('HTTP_X_VERCEL_PATH') or
                 environ.get('REQUEST_URI') or
@@ -32,6 +28,12 @@ class VercelWSGIMiddleware:
                 environ.get('HTTP_X_ORIGINAL_URL') or
                 environ.get('HTTP_X_REWRITE_URL') or
                 environ.get('PATH_INFO'))
+
+        print(f"[MIDDLEWARE] Original PATH_INFO: {original_path}", file=sys.stderr)
+        print(f"[MIDDLEWARE] X-Vercel-Original-URL: {environ.get('HTTP_X_VERCEL_ORIGINAL_URL')}", file=sys.stderr)
+        print(f"[MIDDLEWARE] X-Vercel-Path: {environ.get('HTTP_X_VERCEL_PATH')}", file=sys.stderr)
+        print(f"[MIDDLEWARE] REQUEST_URI: {environ.get('REQUEST_URI')}", file=sys.stderr)
+        print(f"[MIDDLEWARE] X-Forwarded-Uri: {environ.get('HTTP_X_FORWARDED_URI')}", file=sys.stderr)
 
         if path:
             # 1. Strip query strings
@@ -43,7 +45,6 @@ class VercelWSGIMiddleware:
                 path = urlparse(path).path
 
             # 3. Vercel often prefixes the path with /api/index when rewriting.
-            # We must remove this so Flask sees the route defined in app.py (e.g., /diagnose)
             if path.startswith('/api/index'):
                 path = path[len('/api/index'):]
 
@@ -54,13 +55,24 @@ class VercelWSGIMiddleware:
                 path = '/' + path
 
             environ['PATH_INFO'] = path
-            print(f"[VERCEL DEBUG] FINAL PATH_INFO: {path}", file=sys.stderr)
+            print(f"[MIDDLEWARE] Final PATH_INFO: {path}", file=sys.stderr)
 
         # Final check: if Flask still sees /api/index, force it to root
         if environ.get('PATH_INFO') == '/api/index':
             environ['PATH_INFO'] = '/'
 
-        print(f"[VERCEL DEBUG] === REQUEST END ===", file=sys.stderr)
         return self.wsgi_app(environ, start_response)
 
 app.wsgi_app = VercelWSGIMiddleware(app.wsgi_app)
+
+# Simple test endpoint to verify routing works
+from flask import jsonify, request
+
+@app.route('/api/test-path')
+def test_path():
+    return jsonify({
+        "path_info": request.environ.get('PATH_INFO'),
+        "request_uri": request.environ.get('REQUEST_URI'),
+        "vercel_original": request.environ.get('HTTP_X_VERCEL_ORIGINAL_URL'),
+        "vercel_path": request.environ.get('HTTP_X_VERCEL_PATH'),
+    })
