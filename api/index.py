@@ -111,3 +111,8 @@ def test_path():
         "vercel_original": request.environ.get('HTTP_X_VERCEL_ORIGINAL_URL'),
         "vercel_path": request.environ.get('HTTP_X_VERCEL_PATH'),
     })
+
+# Simple test route to verify route registration works
+@app.route('/api/test-route')
+def test_route():
+    return jsonify({"status": "ok", "message": "Route registered successfully"})
