@@ -411,6 +411,27 @@ def toggle_lang():
 
 # --- API ENDPOINTS ---
 
+@app.route('/api/debug-headers')
+def api_debug_headers():
+    """Debug endpoint to see what headers Vercel sends"""
+    import os
+    headers = {}
+    for key, value in os.environ.items():
+        if 'VERCEL' in key.upper() or 'FORWARD' in key.upper() or 'ORIGINAL' in key.upper() or 'URI' in key.upper() or 'PATH' in key.upper():
+            headers[key] = value
+    # Also include request headers
+    from flask import request
+    req_headers = {}
+    for key, value in request.headers:
+        if 'vercel' in key.lower() or 'forward' in key.lower() or 'original' in key.lower() or 'uri' in key.lower() or 'path' in key.lower():
+            req_headers[key] = value
+    return jsonify({
+        "environ": headers,
+        "request_headers": req_headers,
+        "path_info": request.environ.get('PATH_INFO'),
+        "request_uri": request.environ.get('REQUEST_URI'),
+    })
+
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     farmer_id = get_current_farmer_id()
