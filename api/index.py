@@ -61,6 +61,12 @@ def vercel_dispatch(subpath):
         # Fallback: use subpath from the route
         path = '/' + subpath if subpath else '/'
 
+    # DEBUG
+    print(f"[DISPATCH] original_url: {original_url}", file=sys.stderr)
+    print(f"[DISPATCH] path: {path}", file=sys.stderr)
+    print(f"[DISPATCH] subpath: {subpath}", file=sys.stderr)
+    print(f"[DISPATCH] route_map keys: {list(route_map.keys())}", file=sys.stderr)
+
     # Map paths to view functions
     route_map = {
         '/': 'home',
@@ -87,9 +93,13 @@ def vercel_dispatch(subpath):
     elif path in route_map:
         view_func = app.view_functions.get(route_map[path])
         if view_func:
+            print(f"[DISPATCH] Calling view: {route_map[path]}", file=sys.stderr)
             return view_func()
+        else:
+            print(f"[DISPATCH] View function not found for: {route_map[path]}", file=sys.stderr)
 
     # Default to home
+    print(f"[DISPATCH] Defaulting to home", file=sys.stderr)
     return app.view_functions['home']()
 
 # Test endpoint
