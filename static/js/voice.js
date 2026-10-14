@@ -89,7 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: query })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(data => Promise.reject({ status: res.status, data }));
+            }
+            return res.json();
+        })
         .then(data => {
             // Remove loading
             const loadingMsg = document.getElementById(botLoadingId);
@@ -108,7 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => {
             const loadingMsg = document.getElementById(botLoadingId);
             if (loadingMsg) loadingMsg.remove();
-            appendMessage("క్షమించండి, సర్వర్ కనెక్షన్ లో సమస్య వచ్చింది. (Connection issue)", 'bot');
+
+            const errorText = err && err.data && err.data.error
+                ? err.data.error
+                : "క్షమించండి, సర్వర్ కనెక్షన్ లో సమస్య వచ్చింది. (Connection issue)";
+
+            appendMessage(errorText, 'bot');
             console.error("Chat API error:", err);
         });
     }

@@ -59,9 +59,18 @@ class WeatherService:
         # Default fallback to central AP (Guntur)
         return 16.3067, 80.4365
 
-    def get_weather_forecast(self, location_name):
+    def get_weather_forecast(self, location_name, latitude=None, longitude=None):
         """Fetches 3-day weather forecast from Open-Meteo, with caching."""
-        cache_key = location_name.strip().lower() if location_name else "default"
+        # Determine coordinates first
+        if latitude is not None and longitude is not None:
+            try:
+                lat, lon = float(latitude), float(longitude)
+            except (ValueError, TypeError):
+                lat, lon = self._geocode_location(location_name)
+        else:
+            lat, lon = self._geocode_location(location_name)
+
+        cache_key = f"{round(lat, 3)}_{round(lon, 3)}" if lat and lon else (location_name.strip().lower() if location_name else "default")
         cached_data = self.storage_service.get_weather_cache(cache_key)
         
         # Check if cache is still valid (less than 1 hour old)
@@ -75,8 +84,6 @@ class WeatherService:
                 except Exception:
                     pass
 
-        # If cache invalid or missing, fetch new forecast
-        lat, lon = self._geocode_location(location_name)
         try:
             url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,relative_humidity_2m_max&timezone=auto"
             response = requests.get(url, timeout=8)

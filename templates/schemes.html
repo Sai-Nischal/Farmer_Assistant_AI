@@ -17,84 +17,151 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="/dashboard" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1>{{ ui.schemes }}</h1>
-        <a href="/toggle-lang" class="lang-toggle">
-            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/dashboard" class="top-bar-icon" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1><i class="fas fa-file-invoice-dollar text-warning"></i> {{ ui.schemes }}</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if is_logged_in %}
+                <a href="/settings" class="top-farmer-pill" title="Farmer Profile">
+                    <span class="avatar-mini">{{ current_farmer.name[0] if current_farmer.name else 'R' }}</span>
+                    <span class="d-none d-sm-inline">{{ current_farmer.name[:10] if current_farmer.name else 'Farmer' }}</span>
+                </a>
+                <a href="/logout" class="top-btn-ghost" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            {% else %}
+                <a href="/login" class="top-btn-login">
+                    <i class="fas fa-user"></i> <span class="d-none d-sm-inline">{{ ui.login }}</span>
+                </a>
+            {% endif %}
+            <a href="/toggle-lang" class="lang-toggle">
+                <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+            </a>
+        </div>
     </div>
 
     <div class="container card-container">
         <!-- Interactive search/filter panel -->
-        <div class="farmer-card p-3">
-            <h6 class="mb-2"><i class="fas fa-filter text-success"></i> 
-                {% if lang_pref == 'te' %}పంట రకాలను బట్టి వడపోయండి (Filter):{% else %}Filter by Crop / Category:{% endif %}
-            </h6>
-            <select class="form-select bg-dark text-light border-secondary" id="scheme-category-select">
-                <option value="all">{% if lang_pref == 'te' %}అన్ని పథకాలు (All Schemes){% else %}All Schemes{% endif %}</option>
-                {% for cat in categories %}
-                <option value="{{ cat }}">{{ cat }}</option>
-                {% endfor %}
-            </select>
+        <div class="farmer-card p-3 mb-3">
+            <!-- Search Bar -->
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-dark border-secondary text-success"><i class="fas fa-search"></i></span>
+                <input type="text" id="scheme-search-input" class="form-control bg-dark text-light border-secondary" 
+                       placeholder="{% if lang_pref == 'te' %}పథకం పేరు లేదా కీవర్డ్ తో వెతకండి...{% else %}Search scheme by name, subsidy, insurance...{% endif %}">
+                <button class="btn btn-outline-secondary" type="button" id="clear-search-btn" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Category Pills / Dropdown -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <label for="scheme-category-select" class="small text-light-secondary mb-0">
+                    <i class="fas fa-filter text-success me-1"></i> 
+                    {% if lang_pref == 'te' %}కేటగిరీ ద్వారా వడపోయండి:{% else %}Filter by Category:{% endif %}
+                </label>
+                <select class="form-select form-select-sm bg-dark text-light border-secondary" id="scheme-category-select" style="max-width: 250px;">
+                    <option value="all">{% if lang_pref == 'te' %}అన్ని పథకాలు (All Schemes){% else %}All Schemes{% endif %}</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
-        <h5 class="mb-3 text-light-secondary"><i class="fas fa-award"></i> 
-            {% if lang_pref == 'te' %}మీకు అర్హత ఉన్న ప్రభుత్వ పథకాలు ({% else %}Eligible Government Schemes ({% endif %}{{ schemes|length }})
-        </h5>
+        <!-- Section Title & Counter -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 text-light-secondary">
+                <i class="fas fa-award text-accent-gold me-1"></i> 
+                {% if lang_pref == 'te' %}మీకు అర్హత ఉన్న ప్రభుత్వ పథకాలు{% else %}Eligible Welfare Schemes{% endif %}
+                <span class="badge bg-success ms-1" id="visible-count">{{ schemes|length }}</span>
+            </h5>
+            <a href="/settings" class="small text-decoration-none text-success">
+                <i class="fas fa-sliders-h"></i> {% if lang_pref == 'te' %}ప్రొఫైల్ మార్చండి{% else %}Edit Criteria{% endif %}
+            </a>
+        </div>
 
-        {% if schemes|length == 0 %}
-        <div class="alert alert-secondary bg-dark border-secondary text-light text-center" role="alert">
-            <p class="mb-0">
+        <!-- Zero Schemes Message -->
+        <div id="no-schemes-alert" class="alert alert-secondary bg-dark border-secondary text-light text-center {% if schemes|length > 0 %}d-none{% endif %}" role="alert">
+            <i class="fas fa-info-circle text-warning fs-3 mb-2"></i>
+            <p class="mb-2">
                 {% if lang_pref == 'te' %}
                 మీ ప్రొఫైల్ వివరాలకు సరిపోయే ఏ పథకాలు లభించలేదు. మీ ల్యాండ్ సైజ్ లేదా పంటను సెట్టింగ్స్ లో అప్‌డేట్ చేయండి.
                 {% else %}
-                No matching schemes found. Adjust your land parameters in Settings to check other schemes.
+                No matching schemes found for your current criteria. Update your crop or land size in Settings to explore more.
                 {% endif %}
             </p>
+            <a href="/settings" class="btn btn-sm btn-primary-custom">
+                <i class="fas fa-edit"></i> {% if lang_pref == 'te' %}సెట్టింగ్స్ లో సవరించండి{% else %}Update Profile{% endif %}
+            </a>
         </div>
-        {% endif %}
 
-        <!-- Scheme Cards list -->
-        <div class="scheme-list-container">
+        <!-- Scheme Cards List -->
+        <div class="scheme-list-container" id="scheme-cards-list">
             {% for scheme in schemes %}
-            <div class="farmer-card scheme-card-item" data-category="{{ scheme.category }}">
-                <div class="card-header-custom" style="background-color: var(--primary-dark); border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <span class="text-accent-gold"><i class="fas fa-gift"></i> 
+            <div class="farmer-card scheme-card-item mb-3" 
+                 data-category="{{ scheme.category }}" 
+                 data-title-en="{{ scheme.name_en|lower }}" 
+                 data-title-te="{{ scheme.name_te|lower }}"
+                 data-benefit="{{ (scheme.benefit_en ~ ' ' ~ scheme.benefit_te)|lower }}">
+                
+                <div class="card-header-custom d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1b4332 0%, #081c15 100%); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <span class="text-accent-gold fw-bold">
+                        <i class="fas fa-gift me-2 text-warning"></i> 
                         {% if lang_pref == 'te' %}{{ scheme.name_te }}{% else %}{{ scheme.name_en }}{% endif %}
                     </span>
-                    <span class="badge bg-success small">{{ scheme.category }}</span>
+                    <span class="badge bg-success px-2 py-1">{{ scheme.category }}</span>
                 </div>
+
                 <div class="card-body-custom small text-light-secondary">
-                    <p class="mb-2"><strong>{% if lang_pref == 'te' %}ప్రయోజనం / లాభం:{% else %}Benefit:{% endif %}</strong> 
-                        {% if lang_pref == 'te' %}{{ scheme.benefit_te }}{% else %}{{ scheme.benefit_en }}{% endif %}
-                    </p>
+                    <!-- Benefit -->
+                    <div class="benefit-box p-2 rounded mb-2" style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent-gold);">
+                        <strong class="text-light">
+                            <i class="fas fa-coins text-warning me-1"></i>
+                            {% if lang_pref == 'te' %}ప్రయోజనం / లాభం:{% else %}Benefit:{% endif %}
+                        </strong> 
+                        <span class="text-light-secondary">
+                            {% if lang_pref == 'te' %}{{ scheme.benefit_te }}{% else %}{{ scheme.benefit_en }}{% endif %}
+                        </span>
+                    </div>
 
                     <!-- Expandable 'Why am I eligible' -->
                     <div class="accordion accordion-flush bg-dark rounded mb-3" id="accordionScheme{{ loop.index }}">
                         <div class="accordion-item bg-transparent border-0">
                             <h2 class="accordion-header bg-transparent" id="heading{{ loop.index }}">
                                 <button class="accordion-button collapsed bg-transparent text-light border-0 small py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" style="box-shadow: none;">
-                                    <i class="fas fa-question-circle text-info me-2"></i> 
-                                    {% if lang_pref == 'te' %}నేను ఎందుకు అర్హుడిని? (Eligibility Details){% else %}Why am I eligible?{% endif %}
+                                    <i class="fas fa-check-circle text-success me-2"></i> 
+                                    {% if lang_pref == 'te' %}నేను ఎందుకు అర్హుడిని? (Eligibility Breakdown){% else %}Why am I eligible?{% endif %}
                                 </button>
                             </h2>
                             <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionScheme{{ loop.index }}">
-                                <div class="accordion-body text-muted small pt-1 pb-3 px-3">
-                                    {{ scheme.reason_en }}
+                                <div class="accordion-body text-light-secondary small pt-1 pb-3 px-3 border-top border-secondary">
+                                    {% if lang_pref == 'te' and scheme.reason_te %}
+                                        {{ scheme.reason_te }}
+                                    {% else %}
+                                        {{ scheme.reason_en }}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <p class="mb-3"><strong>{% if lang_pref == 'te' %}దరఖాస్తు విధానం:{% else %}How to Apply:{% endif %}</strong> 
+                    <!-- How to apply -->
+                    <p class="mb-3">
+                        <strong class="text-light">
+                            <i class="fas fa-clipboard-list text-info me-1"></i>
+                            {% if lang_pref == 'te' %}దరఖాస్తు విధానం:{% else %}How to Apply:{% endif %}
+                        </strong> 
                         {% if lang_pref == 'te' %}{{ scheme.how_to_apply_te }}{% else %}{{ scheme.how_to_apply_en }}{% endif %}
                     </p>
 
+                    <!-- Application Link Button -->
                     <div class="text-end">
-                        <a href="{{ scheme.apply_link }}" target="_blank" class="btn btn-sm btn-large-tap btn-primary-custom" style="display: inline-flex; width: auto;">
-                            <i class="fas fa-external-link-alt"></i> {% if lang_pref == 'te' %}అధికారిక వెబ్‌సైట్{% else %}Apply Online{% endif %}
+                        <a href="{{ scheme.apply_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-large-tap btn-primary-custom" style="display: inline-flex; width: auto; align-items: center; gap: 6px;">
+                            <i class="fas fa-external-link-alt"></i> 
+                            {% if lang_pref == 'te' %}అధికారిక వెబ్‌సైట్ ద్వారా దరఖాస్తు చేయండి{% else %}Apply on Official Portal{% endif %}
                         </a>
                     </div>
                 </div>
@@ -113,7 +180,7 @@
             <i class="fas fa-cloud-sun"></i>
             <span>{{ ui.advisory }}</span>
         </a>
-        <a href="/schemes">
+        <a href="/schemes" class="active">
             <i class="fas fa-file-invoice-dollar"></i>
             <span>{{ ui.schemes }}</span>
         </a>
@@ -132,19 +199,54 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const select = document.getElementById('scheme-category-select');
+            const searchInput = document.getElementById('scheme-search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
             const items = document.querySelectorAll('.scheme-card-item');
+            const countBadge = document.getElementById('visible-count');
+            const noSchemesAlert = document.getElementById('no-schemes-alert');
 
-            if (select) {
-                select.addEventListener('change', (e) => {
-                    const value = e.target.value.toLowerCase();
-                    items.forEach(item => {
-                        const cat = item.dataset.category.toLowerCase();
-                        if (value === 'all' || cat === value || cat.includes(value) || value.includes(cat)) {
-                            item.style.display = 'block';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
+            function filterSchemes() {
+                const selectedCat = (select ? select.value.toLowerCase() : 'all');
+                const searchQuery = (searchInput ? searchInput.value.toLowerCase().trim() : '');
+                
+                if (clearBtn) {
+                    clearBtn.style.display = searchQuery ? 'inline-block' : 'none';
+                }
+
+                let visible = 0;
+                items.forEach(item => {
+                    const cat = (item.dataset.category || '').toLowerCase();
+                    const titleEn = (item.dataset.titleEn || '').toLowerCase();
+                    const titleTe = (item.dataset.titleTe || '').toLowerCase();
+                    const benefit = (item.dataset.benefit || '').toLowerCase();
+
+                    const matchesCategory = (selectedCat === 'all' || cat === selectedCat || cat.includes(selectedCat) || selectedCat.includes(cat));
+                    const matchesSearch = (!searchQuery || titleEn.includes(searchQuery) || titleTe.includes(searchQuery) || benefit.includes(searchQuery) || cat.includes(searchQuery));
+
+                    if (matchesCategory && matchesSearch) {
+                        item.style.display = 'block';
+                        visible++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (countBadge) countBadge.textContent = visible;
+                if (noSchemesAlert) {
+                    if (visible === 0) {
+                        noSchemesAlert.classList.remove('d-none');
+                    } else {
+                        noSchemesAlert.classList.add('d-none');
+                    }
+                }
+            }
+
+            if (select) select.addEventListener('change', filterSchemes);
+            if (searchInput) searchInput.addEventListener('input', filterSchemes);
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    filterSchemes();
                 });
             }
         });

@@ -17,13 +17,30 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="/dashboard" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1>{{ ui.advisory }}</h1>
-        <a href="/toggle-lang" class="lang-toggle">
-            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/dashboard" class="top-bar-icon" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1><i class="fas fa-cloud-sun text-info"></i> {{ ui.advisory }}</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if is_logged_in %}
+                <a href="/settings" class="top-farmer-pill" title="Farmer Profile">
+                    <span class="avatar-mini">{{ current_farmer.name[0] if current_farmer.name else 'R' }}</span>
+                    <span class="d-none d-sm-inline">{{ current_farmer.name[:10] if current_farmer.name else 'Farmer' }}</span>
+                </a>
+                <a href="/logout" class="top-btn-ghost" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            {% else %}
+                <a href="/login" class="top-btn-login">
+                    <i class="fas fa-user"></i> <span class="d-none d-sm-inline">{{ ui.login }}</span>
+                </a>
+            {% endif %}
+            <a href="/toggle-lang" class="lang-toggle">
+                <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+            </a>
+        </div>
     </div>
 
     <div class="container card-container">

@@ -1,13 +1,17 @@
 import sys
 import logging
 import os
+from datetime import date
 from flask import Flask
 
 # Set up logging early
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "rythu_mitra_ai_secure_dev_key")
+app.secret_key = os.environ.get("SECRET_KEY") or "change-me-in-production"
+app.config['CHAT_LIMIT_PER_DAY'] = int(os.environ.get('CHAT_LIMIT_PER_DAY', '20'))
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
 
 try:
     import uuid
@@ -79,19 +83,41 @@ def get_current_farmer_id():
         session['farmer_id'] = 'farmer_123'  # Default farmer ID
     return session['farmer_id']
 
+
+def get_chat_usage_state():
+    today = date.today().isoformat()
+    state = session.get('chat_usage', {})
+    if state.get('date') != today:
+        state = {'date': today, 'count': 0}
+        session['chat_usage'] = state
+    return state
+
+
+def register_chat_usage():
+    limit = app.config.get('CHAT_LIMIT_PER_DAY', 20)
+    usage = get_chat_usage_state()
+    if usage['count'] >= limit:
+        return False, usage, limit
+
+    usage['count'] += 1
+    session['chat_usage'] = usage
+    return True, usage, limit
+
+
 @app.context_processor
 def inject_farmer():
     """Injects current farmer profile and UI translations globally."""
-    farmer_id = get_current_farmer_id()
+    is_logged_in = 'farmer_id' in session
+    farmer_id = session.get('farmer_id') or 'farmer_123'
     farmer = storage_service.get_farmer(farmer_id)
     if not farmer:
         # Create a default small farmer
         farmer = Farmer(
             id=farmer_id,
-            name="",
-            village_mandal="",
-            land_size_acres=0.0,
-            primary_crop="",
+            name="రామయ్య (Ramayya)" if farmer_id == 'farmer_123' else "",
+            village_mandal="Guntur",
+            land_size_acres=3.0,
+            primary_crop="Paddy",
             category="small_marginal",
             language="en",
             voice_enabled=True
@@ -102,7 +128,7 @@ def inject_farmer():
     te_translations = {
         "title": "రైతు మిత్ర AI",
         "home": "హోమ్",
-        "diagnose": "రోగా నిర్ధారణ",
+        "diagnose": "రోగ నిర్ధారణ",
         "advisory": "సలహాలు",
         "schemes": "పథకాలు",
         "history": "చరిత్ర",
@@ -110,7 +136,10 @@ def inject_farmer():
         "photo_btn": "ఫోటో తీయండి / అప్‌లోడ్ చేయండి",
         "voice_btn": "మాట్లాడండి",
         "lang_toggle": "English",
-        "offline_banner": "ఇంటర్నెట్ లేదు - మునుపటి ఫలితాలు చూపిస్తోంది"
+        "offline_banner": "ఇంటర్నెట్ లేదు - మునుపటి ఫలితాలు చూపిస్తోంది",
+        "login": "లాగిన్",
+        "logout": "లాగౌట్",
+        "register": "రిజిస్ట్రేషన్"
     }
     
     en_translations = {
@@ -124,21 +153,93 @@ def inject_farmer():
         "photo_btn": "Take / Upload Photo",
         "voice_btn": "Speak Now",
         "lang_toggle": "తెలుగు",
-        "offline_banner": "No Connection - Showing Cached Data"
+        "offline_banner": "No Connection - Showing Cached Data",
+        "login": "Sign In",
+        "logout": "Logout",
+        "register": "Register"
     }
     
     translations = te_translations if farmer.language == 'te' else en_translations
-    return dict(current_farmer=farmer, lang_pref=farmer.language, ui=translations)
+    return dict(current_farmer=farmer, lang_pref=farmer.language, ui=translations, is_logged_in=is_logged_in)
 
 # --- ROUTES ---
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    farmer_id = get_current_farmer_id()
+    farmer = storage_service.get_farmer(farmer_id)
+    weather_data = None
+    try:
+        loc = farmer.village_mandal if farmer and farmer.village_mandal else "Guntur"
+        lat = getattr(farmer, "latitude", None)
+        lon = getattr(farmer, "longitude", None)
+        weather_data = weather_agent.get_forecast(loc, latitude=lat, longitude=lon)
+    except Exception as e:
+        logging.warning(f"Homepage weather glance error: {e}")
+    return render_template('home.html', weather=weather_data)
 
 @app.route('/dashboard')
 def index():
     return render_template('index.html')
+
+# --- AUTHENTICATION ROUTES ---
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        identifier = request.form.get('identifier', '').strip()
+        if not identifier:
+            return render_template('login.html', error="దయచేసి మీ మొబైల్ నంబర్ లేదా ఫార్మర్ ఐడీ నమోదు చేయండి. / Please enter mobile number or Farmer ID.")
+            
+        farmer = storage_service.find_farmer_by_phone_or_id(identifier)
+        if farmer:
+            session['farmer_id'] = farmer.id
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error="ఈ నంబర్ లేదా ఐడీతో ఖాతా కనుగొనబడలేదు. దయచేసి క్రింద నమోదు చేసుకోండి. / Account not found. Please register below or try Demo Login.", identifier=identifier)
+            
+    return render_template('login.html')
+
+@app.route('/login/demo')
+def login_demo():
+    session['farmer_id'] = 'farmer_123'
+    return redirect(url_for('index'))
+
+@app.route('/register', methods=['POST'])
+def register():
+    name = request.form.get('name', '').strip()
+    phone = request.form.get('phone', '').strip()
+    village = request.form.get('village_mandal', '').strip()
+    land = request.form.get('land_size_acres', '0')
+    crop = request.form.get('primary_crop', '').strip()
+    lang = request.form.get('language', 'en')
+    lat = request.form.get('latitude')
+    lon = request.form.get('longitude')
+    
+    if not name:
+        return render_template('login.html', register_error="రైతు పేరు తప్పనిసరి. / Farmer name is required.", active_tab="register")
+        
+    farmer_id = f"farmer_{uuid.uuid4().hex[:8]}"
+    new_farmer = Farmer(
+        id=farmer_id,
+        name=name,
+        village_mandal=village,
+        land_size_acres=land,
+        primary_crop=crop,
+        language=lang,
+        phone=phone if phone else None,
+        latitude=lat if lat else None,
+        longitude=lon if lon else None,
+        voice_enabled=True
+    )
+    storage_service.save_farmer(new_farmer)
+    session['farmer_id'] = new_farmer.id
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    session.pop('farmer_id', None)
+    return redirect(url_for('home'))
 
 @app.route('/diagnose', methods=['GET', 'POST'])
 def diagnose():
@@ -194,8 +295,11 @@ def advisory():
     farmer_id = get_current_farmer_id()
     farmer = storage_service.get_farmer(farmer_id)
     
-    # Get weather forecast
-    weather_data = weather_agent.get_forecast(farmer.village_mandal)
+    # Get weather forecast using coordinates if available
+    loc = getattr(farmer, "village_mandal", "Guntur") or "Guntur"
+    lat = getattr(farmer, "latitude", None)
+    lon = getattr(farmer, "longitude", None)
+    weather_data = weather_agent.get_forecast(loc, latitude=lat, longitude=lon)
     
     # Get latest diagnosis to render alongside
     history = storage_service.get_history(farmer_id)
@@ -205,17 +309,40 @@ def advisory():
 
 @app.route('/schemes')
 def schemes():
-    farmer_id = get_current_farmer_id()
-    farmer = storage_service.get_farmer(farmer_id)
-    
-    # Find matching schemes
-    matched = scheme_agent.evaluate_eligibility(farmer)
-    
-    # Get all schemes for filter lists
-    all_schemes = storage_service.get_all_schemes()
-    categories = list(set([s.category for s in all_schemes]))
-    
-    return render_template('schemes.html', schemes=matched, categories=categories)
+    try:
+        farmer_id = get_current_farmer_id()
+        farmer = storage_service.get_farmer(farmer_id)
+        if not farmer:
+            farmer = Farmer(id=farmer_id, name="", village_mandal="", land_size_acres=0.0, primary_crop="")
+            
+        # Find matching schemes
+        matched = scheme_agent.evaluate_eligibility(farmer)
+        
+        # Get all schemes for filter lists
+        all_schemes = storage_service.get_all_schemes()
+        categories = sorted(list(set([s.category for s in all_schemes if getattr(s, 'category', None)])))
+        
+        return render_template('schemes.html', schemes=matched, categories=categories, all_schemes_count=len(all_schemes))
+    except Exception as e:
+        logging.error(f"Error evaluating schemes: {e}", exc_info=True)
+        all_schemes = storage_service.get_all_schemes()
+        fallback_matched = []
+        for s in all_schemes:
+            fallback_matched.append({
+                "id": s.id,
+                "name_en": s.name_en,
+                "name_te": s.name_te,
+                "category": s.category,
+                "benefit_en": s.benefit_en,
+                "benefit_te": s.benefit_te,
+                "apply_link": s.apply_link,
+                "how_to_apply_en": s.how_to_apply_en,
+                "how_to_apply_te": s.how_to_apply_te,
+                "reason_en": "General welfare scheme open to all farmers.",
+                "reason_te": "రైతులందరికీ వర్తించే సాధారణ సంక్షేమ పథకం."
+            })
+        categories = sorted(list(set([s.category for s in all_schemes if getattr(s, 'category', None)])))
+        return render_template('schemes.html', schemes=fallback_matched, categories=categories, all_schemes_count=len(all_schemes))
 
 @app.route('/history')
 def history():
@@ -227,14 +354,19 @@ def history():
 def settings():
     farmer_id = get_current_farmer_id()
     farmer = storage_service.get_farmer(farmer_id)
+    if not farmer:
+        farmer = Farmer(id=farmer_id, name="", village_mandal="", land_size_acres=0.0, primary_crop="")
     
     if request.method == 'POST':
         name = request.form.get('name', farmer.name)
+        phone = request.form.get('phone', getattr(farmer, 'phone', ''))
         village = request.form.get('village_mandal', farmer.village_mandal)
         land = request.form.get('land_size_acres', farmer.land_size_acres)
         crop = request.form.get('primary_crop', farmer.primary_crop)
         lang = request.form.get('language', farmer.language)
         voice = request.form.get('voice_enabled') == 'on'
+        latitude = request.form.get('latitude', getattr(farmer, 'latitude', None))
+        longitude = request.form.get('longitude', getattr(farmer, 'longitude', None))
         
         # Save custom credentials if inputted
         api_key = request.form.get('gemini_api_key', '')
@@ -242,7 +374,6 @@ def settings():
             session['gemini_api_key_override'] = api_key
             os.environ['GEMINI_API_KEY'] = api_key
         else:
-            # Allow clearing the override key
             session.pop('gemini_api_key_override', None)
             
         updated_farmer = Farmer(
@@ -252,7 +383,10 @@ def settings():
             land_size_acres=land,
             primary_crop=crop,
             language=lang,
-            voice_enabled=voice
+            voice_enabled=voice,
+            phone=phone,
+            latitude=latitude,
+            longitude=longitude
         )
         storage_service.save_farmer(updated_farmer)
         return redirect(url_for('settings'))
@@ -275,18 +409,33 @@ def toggle_lang():
 def api_chat():
     farmer_id = get_current_farmer_id()
     api_key_override = session.get('gemini_api_key_override')
-    
+
     data = request.json or {}
     text_query = data.get("query")
-    
+
     if not text_query:
         return jsonify({"error": "No query provided"}), 400
-        
+
+    allowed, usage, limit = register_chat_usage()
+    if not allowed:
+        return jsonify({
+            "error": "Daily chat limit reached. Please try again tomorrow.",
+            "limit": limit,
+            "used": usage['count'],
+            "remaining": 0,
+            "limit_reached": True,
+        }), 429
+
     result = conversation_agent.process_farmer_input(
         farmer_id=farmer_id,
         text_input=text_query,
         api_key=api_key_override
     )
+    result['usage'] = {
+        "limit": limit,
+        "used": usage['count'],
+        "remaining": max(limit - usage['count'], 0)
+    }
     return jsonify(result)
 
 @app.route('/api/voice-output', methods=['POST'])

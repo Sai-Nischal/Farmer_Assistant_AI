@@ -6,6 +6,7 @@
     <title>{{ ui.settings }} - {{ ui.title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body data-lang="{{ lang_pref }}" data-voice="{{ 'true' if current_farmer.voice_enabled else 'false' }}">
@@ -17,13 +18,26 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="/dashboard" style="color: white; text-decoration: none; font-size: 20px; min-width: var(--touch-target); display: inline-flex; align-items: center;">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1>{{ ui.settings }}</h1>
-        <a href="/toggle-lang" class="lang-toggle">
-            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/dashboard" class="top-bar-icon" title="Back to Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1><i class="fas fa-cog text-warning"></i> {{ ui.settings }}</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if is_logged_in %}
+                <a href="/logout" class="top-btn-ghost" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i> <span class="d-none d-sm-inline">{{ ui.logout }}</span>
+                </a>
+            {% else %}
+                <a href="/login" class="top-btn-login">
+                    <i class="fas fa-user"></i> <span class="d-none d-sm-inline">{{ ui.login }}</span>
+                </a>
+            {% endif %}
+            <a href="/toggle-lang" class="lang-toggle">
+                <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+            </a>
+        </div>
     </div>
 
     <div class="container card-container">
@@ -32,7 +46,7 @@
             
             <!-- Premium Profile Avatar Header -->
             <div class="profile-avatar-container">
-                <div class="profile-avatar">
+                <div class="profile-avatar" title="Tap 5 times for Developer Config">
                     {% if current_farmer.name %}
                         {{ current_farmer.name[0] }}
                     {% else %}
@@ -42,11 +56,16 @@
                         <i class="fas fa-check"></i>
                     </div>
                 </div>
-                <h2 class="profile-name-title">{{ current_farmer.name }}</h2>
+                <h2 class="profile-name-title">{{ current_farmer.name or 'రైతు మిత్ర (Farmer)' }}</h2>
                 <p class="profile-subtitle">
-                    <i class="fas fa-map-marker-alt" style="color: var(--accent-gold); margin-right: 4px;"></i> {{ current_farmer.village_mandal }} &bull; 
+                    <i class="fas fa-map-marker-alt text-warning me-1"></i> {{ current_farmer.village_mandal or 'Location Not Set' }} &bull; 
                     {% if lang_pref == 'te' %}{{ current_farmer.land_size_acres }} ఎకరాలు{% else %}{{ current_farmer.land_size_acres }} Acres{% endif %}
                 </p>
+                {% if current_farmer.phone %}
+                <p class="small text-muted mb-0">
+                    <i class="fas fa-phone-alt me-1 text-success"></i> +91 {{ current_farmer.phone }}
+                </p>
+                {% endif %}
             </div>
 
             <div class="card-body-custom">
@@ -67,23 +86,51 @@
                             <input type="text" class="form-control form-control-premium" id="name" name="name" value="{{ current_farmer.name }}" placeholder="{% if lang_pref == 'te' %}మీ పేరు నమోదు చేయండి...{% else %}Enter your name...{% endif %}" required>
                         </div>
 
-                        <!-- Village / Mandal -->
+                        <!-- Phone Number -->
                         <div class="mb-3">
-                            <label for="village_mandal" class="form-premium-label small">
-                                {% if lang_pref == 'te' %}గ్రామం / మండలం (Village/Mandal):{% else %}Village / Mandal:{% endif %}
+                            <label for="phone" class="form-premium-label small">
+                                {% if lang_pref == 'te' %}మొబైల్ నంబర్ (Phone Number):{% else %}Mobile Number:{% endif %}
                             </label>
-                            <select class="form-select form-select-premium" id="village_mandal" name="village_mandal" required>
-                                <option value="" {% if not current_farmer.village_mandal %}selected{% endif %} disabled>{% if lang_pref == 'te' %}గ్రామం / మండలం ఎంచుకోండి...{% else %}Select Village / Mandal...{% endif %}</option>
-                                <option value="Guntur" {% if current_farmer.village_mandal == 'Guntur' %}selected{% endif %}>Guntur (గుంటూరు)</option>
-                                <option value="Anantapur" {% if current_farmer.village_mandal == 'Anantapur' %}selected{% endif %}>Anantapur (అనంతపురం)</option>
-                                <option value="Nellore" {% if current_farmer.village_mandal == 'Nellore' %}selected{% endif %}>Nellore (నెల్లూరు)</option>
-                                <option value="Kurnool" {% if current_farmer.village_mandal == 'Kurnool' %}selected{% endif %}>Kurnool (కర్నూలు)</option>
-                                <option value="Visakhapatnam" {% if current_farmer.village_mandal == 'Visakhapatnam' %}selected{% endif %}>Visakhapatnam (విశాఖపట్నం)</option>
-                                <option value="Vijayawada" {% if current_farmer.village_mandal == 'Vijayawada' %}selected{% endif %}>Vijayawada (విజయవాడ)</option>
-                                <option value="Kadapa" {% if current_farmer.village_mandal == 'Kadapa' %}selected{% endif %}>Kadapa (కడప)</option>
-                                <option value="Tirupati" {% if current_farmer.village_mandal == 'Tirupati' %}selected{% endif %}>Tirupati (తిరుపతి)</option>
-                                <option value="Kakinada" {% if current_farmer.village_mandal == 'Kakinada' %}selected{% endif %}>Kakinada (కాకినాడ)</option>
-                            </select>
+                            <input type="tel" class="form-control form-control-premium" id="phone" name="phone" value="{{ current_farmer.phone or '' }}" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10">
+                        </div>
+
+                        <!-- Location with Interactive GMaps Picker -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="village_mandal" class="form-premium-label small mb-0">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    {% if lang_pref == 'te' %}గ్రామం / మండలం (మ్యాప్ ద్వారా ఎంచుకోండి):{% else %}Village / Mandal (Select on Map):{% endif %}
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" id="gps-btn" style="font-size: 11px;">
+                                    <i class="fas fa-crosshairs me-1"></i> {% if lang_pref == 'te' %}నా ప్రస్తుత స్థానం (GPS){% else %}My GPS Location{% endif %}
+                                </button>
+                            </div>
+
+                            <!-- Search bar for any place -->
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control form-control-premium" id="village_mandal" name="village_mandal" 
+                                       value="{{ current_farmer.village_mandal }}" 
+                                       placeholder="{% if lang_pref == 'te' %}గ్రామం / పట్టణం పేరు వెతకండి లేదా మ్యాప్‌లో పిన్ చేయండి...{% else %}Search any village, mandal, district or pin on map...{% endif %}" required>
+                                <button class="btn btn-secondary" type="button" id="search-location-btn" title="Search place on map">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+
+                            <!-- Hidden coordinates inputs -->
+                            <input type="hidden" id="latitude" name="latitude" value="{{ current_farmer.latitude or '' }}">
+                            <input type="hidden" id="longitude" name="longitude" value="{{ current_farmer.longitude or '' }}">
+
+                            <!-- Interactive Map Box -->
+                            <div class="map-picker-container rounded border border-secondary mb-1" style="height: 220px; position: relative; z-index: 1;" id="settings-map"></div>
+                            
+                            <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 11px;">
+                                <span><i class="fas fa-hand-pointer text-warning me-1"></i> {% if lang_pref == 'te' %}మ్యాప్‌పై క్లిక్ చేసి లేదా పిన్ లాగి స్థానాన్ని మార్చండి.{% else %}Click map or drag pin to update your farm location.{% endif %}</span>
+                                <span id="coords-display" class="text-success font-monospace">
+                                    {% if current_farmer.latitude and current_farmer.longitude %}
+                                        {{ "%.3f"|format(current_farmer.latitude) }}, {{ "%.3f"|format(current_farmer.longitude) }}
+                                    {% endif %}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -114,6 +161,8 @@
                                 <option value="Chilli" {% if current_farmer.primary_crop == 'Chilli' %}selected{% endif %}>Chilli / మిరప</option>
                                 <option value="Tomato" {% if current_farmer.primary_crop == 'Tomato' %}selected{% endif %}>Tomato / టమోటా</option>
                                 <option value="Groundnut" {% if current_farmer.primary_crop == 'Groundnut' %}selected{% endif %}>Groundnut / వేరుశనగ</option>
+                                <option value="Maize" {% if current_farmer.primary_crop == 'Maize' %}selected{% endif %}>Maize / మొక్కజొన్న</option>
+                                <option value="Pulses" {% if current_farmer.primary_crop == 'Pulses' %}selected{% endif %}>Pulses / పప్పుధాన్యాలు</option>
                                 <option value="Organic Crops" {% if current_farmer.primary_crop == 'Organic Crops' %}selected{% endif %}>Organic Crops / సేంద్రీయ పంటలు</option>
                             </select>
                         </div>
@@ -146,7 +195,7 @@
                         </div>
                     </div>
 
-                    <!-- Hidden Developer Config Section (Easter Egg: Tap Profile Avatar 5 times to reveal) -->
+                    <!-- Hidden Developer Config Section (Tap Avatar 5 times to reveal) -->
                     <div id="developer-config-section" class="form-section-card {% if not api_key_override %}d-none{% endif %}">
                         <div class="form-section-title" style="color: var(--accent-gold);">
                             <i class="fas fa-key"></i> Developer Admin Config
@@ -186,22 +235,23 @@
             <i class="fas fa-history"></i>
             <span>{{ ui.history }}</span>
         </a>
-        <a href="/settings">
+        <a href="/settings" class="active">
             <i class="fas fa-cog"></i>
             <span>{{ ui.settings }}</span>
         </a>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/static/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. Easter egg developer key reveal
             const avatar = document.querySelector('.profile-avatar');
             const devSection = document.getElementById('developer-config-section');
             let tapCount = 0;
             let tapTimeout;
 
             if (avatar && devSection) {
-                // If a key override already exists, auto-reveal the dev section so they can see/edit it
                 const keyInput = document.getElementById('gemini_api_key');
                 if (keyInput && keyInput.value.trim() !== '') {
                     devSection.classList.remove('d-none');
@@ -224,6 +274,128 @@
                         }, 2000);
                     }
                 });
+            }
+
+            // 2. Interactive Map Picker
+            const initialLat = parseFloat("{{ current_farmer.latitude or 16.3067 }}");
+            const initialLon = parseFloat("{{ current_farmer.longitude or 80.4365 }}");
+            const mapEl = document.getElementById('settings-map');
+            
+            if (mapEl) {
+                const map = L.map('settings-map').setView([initialLat, initialLon], 9);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                const marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+
+                function updateMapPosition(lat, lon, placeName) {
+                    marker.setLatLng([lat, lon]);
+                    map.panTo([lat, lon]);
+                    document.getElementById('latitude').value = lat.toFixed(5);
+                    document.getElementById('longitude').value = lon.toFixed(5);
+                    const coordsDisplay = document.getElementById('coords-display');
+                    if (coordsDisplay) {
+                        coordsDisplay.textContent = `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+                    }
+                    if (placeName) {
+                        document.getElementById('village_mandal').value = placeName;
+                    }
+                }
+
+                // Click on map
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lon = e.latlng.lng;
+                    updateMapPosition(lat, lon);
+                    reverseGeocode(lat, lon);
+                });
+
+                // Drag marker
+                marker.on('dragend', function() {
+                    const pos = marker.getLatLng();
+                    updateMapPosition(pos.lat, pos.lng);
+                    reverseGeocode(pos.lat, pos.lng);
+                });
+
+                // Reverse geocoding
+                async function reverseGeocode(lat, lon) {
+                    try {
+                        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
+                        const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+                        if (res.ok) {
+                            const data = await res.json();
+                            const addr = data.address || {};
+                            const place = addr.village || addr.suburb || addr.town || addr.city || addr.county || addr.state_district || "Selected Location";
+                            document.getElementById('village_mandal').value = place;
+                        }
+                    } catch (err) {
+                        console.warn('Reverse geocode error:', err);
+                    }
+                }
+
+                // GPS Button
+                document.getElementById('gps-btn')?.addEventListener('click', function() {
+                    if (navigator.geolocation) {
+                        const btn = this;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+                        navigator.geolocation.getCurrentPosition(function(pos) {
+                            btn.innerHTML = '<i class="fas fa-crosshairs me-1"></i> My GPS Location';
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            updateMapPosition(lat, lon);
+                            map.setZoom(12);
+                            reverseGeocode(lat, lon);
+                        }, function(err) {
+                            btn.innerHTML = '<i class="fas fa-crosshairs me-1"></i> My GPS Location';
+                            alert("Location access denied or unavailable.");
+                        });
+                    } else {
+                        alert("Geolocation not supported by your browser.");
+                    }
+                });
+
+                // Search button
+                async function searchLocation() {
+                    const query = document.getElementById('village_mandal').value.trim();
+                    if (!query) return;
+                    try {
+                        const searchBtn = document.getElementById('search-location-btn');
+                        if (searchBtn) searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                updateMapPosition(lat, lon, data[0].display_name.split(',')[0]);
+                                map.setZoom(12);
+                            } else {
+                                alert("Location not found on map. Try another search term.");
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Search error:", e);
+                    } finally {
+                        const searchBtn = document.getElementById('search-location-btn');
+                        if (searchBtn) searchBtn.innerHTML = '<i class="fas fa-search"></i>';
+                    }
+                }
+
+                document.getElementById('search-location-btn')?.addEventListener('click', searchLocation);
+                document.getElementById('village_mandal')?.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchLocation();
+                    }
+                });
+
+                // Handle window resizing
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 300);
             }
         });
     </script>

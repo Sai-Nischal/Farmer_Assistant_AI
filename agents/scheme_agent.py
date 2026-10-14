@@ -37,58 +37,82 @@ class SchemeAgent:
 
     def evaluate_eligibility(self, farmer: Farmer):
         """Programmatically evaluates schemes matching farmer's criteria to prevent any LLM hallucination."""
-        if not farmer:
+        schemes = self.storage_service.get_all_schemes()
+        if not schemes:
             return []
 
-        schemes = self.storage_service.get_all_schemes()
+        # Safe extraction of farmer attributes
+        village = (getattr(farmer, "village_mandal", "") or "").strip().lower() if farmer else ""
+        try:
+            farmer_land = float(getattr(farmer, "land_size_acres", 0.0) or 0.0) if farmer else 0.0
+        except (ValueError, TypeError):
+            farmer_land = 0.0
+            
+        farmer_crop = (getattr(farmer, "primary_crop", "") or "").strip().lower() if farmer else ""
+        farmer_cat = (getattr(farmer, "category", "") or "small_marginal") if farmer else "small_marginal"
+        
         eligible_schemes = []
 
         for scheme in schemes:
-            elig = scheme.eligibility
+            elig = getattr(scheme, "eligibility", {}) or {}
             
             # 1. State check
-            state_req = elig.get("state", "All")
-            if state_req != "All" and state_req.lower() not in farmer.village_mandal.lower() and state_req != "Andhra Pradesh":
-                # Assuming all our farmers are in Andhra Pradesh since the application is Rythu Mitra AI
-                if "ap" not in farmer.village_mandal.lower() and "andhra" not in farmer.village_mandal.lower():
-                    continue # Skip if state doesn't match
+            state_req = elig.get("state", "All") or "All"
+            if state_req != "All":
+                # If village is unspecified or includes AP, Andhra, or is in AP, permit AP schemes
+                is_ap = ("ap" in village or "andhra" in village or village == "" or 
+                         any(d in village for d in ["guntur", "vijayawada", "nellore", "kurnool", "anantapur", "kadapa", "tirupati", "visakhapatnam", "vizag", "kakinada", "ongole", "chittoor", "eluru", "srikakulam", "vizianagaram", "amravati", "rajahmundry", "machilipatnam"]))
+                if state_req == "Andhra Pradesh" and not is_ap:
+                    continue
+                elif state_req.lower() not in village and state_req != "Andhra Pradesh":
+                    continue
 
             # 2. Land checks
-            max_land = elig.get("max_land_acres", 0.0)
-            min_land = elig.get("min_land_acres", 0.0)
+            try:
+                max_land = float(elig.get("max_land_acres") or 0.0)
+            except (ValueError, TypeError):
+                max_land = 0.0
+                
+            try:
+                min_land = float(elig.get("min_land_acres") or 0.0)
+            except (ValueError, TypeError):
+                min_land = 0.0
             
-            if max_land > 0 and farmer.land_size_acres > max_land:
+            if max_land > 0 and farmer_land > 0 and farmer_land > max_land:
                 continue
-            if min_land > 0 and farmer.land_size_acres < min_land:
+            if min_land > 0 and farmer_land > 0 and farmer_land < min_land:
                 continue
 
             # 3. Farmer Type check (small/marginal vs large)
-            scheme_farmer_type = elig.get("farmer_type", "all")
-            if scheme_farmer_type == "small_marginal" and farmer.category != "small_marginal":
+            scheme_farmer_type = elig.get("farmer_type", "all") or "all"
+            if scheme_farmer_type == "small_marginal" and farmer_cat != "small_marginal" and farmer_land > 5.0:
                 continue
 
             # 4. Crop Category check
-            scheme_cat = scheme.category
-            farmer_crop = farmer.primary_crop or "all"
+            scheme_cat = (getattr(scheme, "category", "") or "All Crops").strip()
             
-            # Match if scheme is "All Crops", or matches crop name
+            # Match if scheme is "All Crops", or matches crop name, or if farmer hasn't specified crop yet
             crop_matched = False
-            if scheme_cat.lower() == "all crops":
+            if scheme_cat.lower() == "all crops" or not farmer_crop or farmer_crop == "all":
                 crop_matched = True
-            elif scheme_cat.lower() in farmer_crop.lower() or farmer_crop.lower() in scheme_cat.lower():
+            elif scheme_cat.lower() in farmer_crop or farmer_crop in scheme_cat.lower():
                 crop_matched = True
-            elif scheme_cat.lower() == "organic crops" and "organic" in farmer_crop.lower():
+            elif scheme_cat.lower() == "organic crops" and "organic" in farmer_crop:
                 crop_matched = True
-            elif scheme_cat.lower() == "horticulture" and farmer_crop.lower() in ["chilli", "tomato", "chilli", "citrus", "mango", "banana", "vegetables", "fruit", "fruits"]:
+            elif scheme_cat.lower() == "horticulture" and any(h in farmer_crop for h in ["chilli", "tomato", "citrus", "mango", "banana", "vegetable", "fruit"]):
                 crop_matched = True
 
             if not crop_matched:
                 continue
 
-            # If it passes all criteria, add explanations
-            reason_en = f"Eligible since your land size ({farmer.land_size_acres} acres) is within the required range ({min_land} to {max_land} acres), your crop is '{farmer.primary_crop}', and you are categorized as a {farmer.category.replace('_', ' ')} farmer."
+            # Generate bilingual explanation
+            cat_display = farmer_cat.replace('_', ' ')
+            crop_display = farmer_crop.capitalize() if farmer_crop else "All Crops"
+            land_display = f"{farmer_land:.1f}" if farmer_land > 0 else "Flexible"
+
+            reason_en = f"Eligible: Land size ({land_display} acres) fits scheme range ({min_land} to {max_land if max_land > 0 else 'No limit'} acres), crop suitability ({crop_display}), and {cat_display} category."
+            reason_te = f"అర్హత: మీ భూమి ({land_display} ఎకరాలు), పంట ({crop_display}), మరియు {cat_display} రైతు వర్గానికి ఈ పథకం సరిపోతుంది."
             
-            # Custom explanations in English
             eligible_schemes.append({
                 "id": scheme.id,
                 "name_en": scheme.name_en,
@@ -99,7 +123,8 @@ class SchemeAgent:
                 "apply_link": scheme.apply_link,
                 "how_to_apply_en": scheme.how_to_apply_en,
                 "how_to_apply_te": scheme.how_to_apply_te,
-                "reason_en": reason_en
+                "reason_en": reason_en,
+                "reason_te": reason_te
             })
 
         return eligible_schemes

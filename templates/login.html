@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="{{ lang_pref }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ui.login }} - {{ ui.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body data-lang="{{ lang_pref }}">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="/" style="color: white; text-decoration: none; font-size: 20px; display: inline-flex; align-items: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1><i class="fas fa-seedling text-warning"></i> {{ ui.title }}</h1>
+        <a href="/toggle-lang" class="lang-toggle">
+            <i class="fas fa-language"></i> {{ ui.lang_toggle }}
+        </a>
+    </div>
+
+    <div class="container card-container my-4" style="max-width: 540px;">
+        <!-- Auth Card -->
+        <div class="farmer-card">
+            <div class="card-header-custom text-center py-3" style="background: linear-gradient(135deg, #1b4332 0%, #081c15 100%);">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-25 p-3 mb-2" style="width: 64px; height: 64px;">
+                    <i class="fas fa-user-circle fa-2x text-warning"></i>
+                </div>
+                <h4 class="mb-1 text-light">
+                    {% if lang_pref == 'te' %}రైతు ఖాతా ప్రవేశం{% else %}Farmer Portal Access{% endif %}
+                </h4>
+                <p class="small text-light-secondary mb-0">
+                    {% if lang_pref == 'te' %}మీ ప్రొఫైల్ ద్వారా స్మార్ట్ సలహాలు పొందండి{% else %}Sign in for personalized advisories & schemes{% endif %}
+                </p>
+            </div>
+
+            <div class="card-body-custom p-4">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills nav-fill mb-4 bg-dark rounded p-1 border border-secondary" id="authTabs" role="tablist">
+                    <li class="nav-nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100 {% if not active_tab or active_tab == 'login' %}active{% endif %} text-light fw-bold py-2" 
+                                id="login-tab" data-bs-toggle="pill" data-bs-target="#login-content" type="button" role="tab" style="border-radius: 8px;">
+                            <i class="fas fa-sign-in-alt me-1"></i> {% if lang_pref == 'te' %}లాగిన్ (Sign In){% else %}Sign In{% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100 {% if active_tab == 'register' %}active{% endif %} text-light fw-bold py-2" 
+                                id="register-tab" data-bs-toggle="pill" data-bs-target="#register-content" type="button" role="tab" style="border-radius: 8px;">
+                            <i class="fas fa-user-plus me-1"></i> {% if lang_pref == 'te' %}కొత్త రైతు (Register){% else %}New Farmer{% endif %}
+                        </button>
+                    </li>
+                </ul>
+
+                {% if error %}
+                <div class="alert alert-danger bg-dark border-danger text-light small py-2 mb-3" role="alert">
+                    <i class="fas fa-exclamation-circle me-1 text-danger"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if register_error %}
+                <div class="alert alert-danger bg-dark border-danger text-light small py-2 mb-3" role="alert">
+                    <i class="fas fa-exclamation-circle me-1 text-danger"></i> {{ register_error }}
+                </div>
+                {% endif %}
+
+                <!-- Tab Contents -->
+                <div class="tab-content" id="authTabsContent">
+                    
+                    <!-- TAB 1: LOGIN -->
+                    <div class="tab-pane fade {% if not active_tab or active_tab == 'login' %}show active{% endif %}" id="login-content" role="tabpanel">
+                        <form action="/login" method="POST">
+                            <div class="mb-3">
+                                <label for="identifier" class="form-premium-label small">
+                                    <i class="fas fa-phone-alt text-success me-1"></i>
+                                    {% if lang_pref == 'te' %}మొబైల్ నంబర్ లేదా ఫార్మర్ ఐడీ:{% else %}Mobile Number or Farmer ID:{% endif %}
+                                </label>
+                                <input type="text" class="form-control form-control-premium text-light" id="identifier" name="identifier" 
+                                       placeholder="{% if lang_pref == 'te' %}ఉదా: 9876543210 లేదా farmer_123{% else %}e.g., 9876543210 or farmer_123{% endif %}" 
+                                       value="{{ identifier or '' }}" required autofocus>
+                                <span class="text-muted" style="font-size: 11px;">
+                                    {% if lang_pref == 'te' %}OTP అవసరం లేదు. తక్షణమే లాగిన్ అవ్వండి.{% else %}No OTP needed. Instant free access.{% endif %}
+                                </span>
+                            </div>
+
+                            <button type="submit" class="btn btn-large-tap btn-primary-custom w-100 mb-3" style="font-size: 16px;">
+                                <i class="fas fa-sign-in-alt me-2"></i> 
+                                {% if lang_pref == 'te' %}ప్రవేశించండి (Sign In){% else %}Sign In to Portal{% endif %}
+                            </button>
+                        </form>
+
+                        <!-- Quick 1-Click Demo Login -->
+                        <div class="text-center my-3">
+                            <span class="text-muted small">── {% if lang_pref == 'te' %}లేదా సులభమైన ప్రవేశం{% else %}or quick demo access{% endif %} ──</span>
+                        </div>
+
+                        <a href="/login/demo" class="btn btn-outline-warning w-100 py-2 d-flex align-items-center justify-content-center gap-2 mb-3" style="border-radius: 12px; font-weight: 600;">
+                            <i class="fas fa-bolt text-warning"></i>
+                            <span>{% if lang_pref == 'te' %}డెమో రైతుగా ప్రవేశించండి (రామయ్య - Guntur){% else %}1-Click Demo Login (Ramayya - Guntur){% endif %}</span>
+                        </a>
+
+                        <div class="text-center mt-3">
+                            <a href="/" class="small text-light-secondary text-decoration-none">
+                                <i class="fas fa-home me-1"></i> {% if lang_pref == 'te' %}హోమ్‌పేజీకి తిరిగి వెళ్ళండి{% else %}Back to Home{% endif %}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: REGISTER -->
+                    <div class="tab-pane fade {% if active_tab == 'register' %}show active{% endif %}" id="register-content" role="tabpanel">
+                        <form action="/register" method="POST" id="register-form">
+                            <!-- Farmer Name -->
+                            <div class="mb-3">
+                                <label for="reg_name" class="form-premium-label small">
+                                    <i class="fas fa-user text-success me-1"></i>
+                                    {% if lang_pref == 'te' %}రైతు పేరు (Farmer Name): *{% else %}Farmer Full Name: *{% endif %}
+                                </label>
+                                <input type="text" class="form-control form-control-premium text-light" id="reg_name" name="name" 
+                                       placeholder="{% if lang_pref == 'te' %}మీ పేరు నమోదు చేయండి (ఉదా: వెంకటేశ్వర్లు){% else %}Enter your name (e.g., Venkatesh){% endif %}" required>
+                            </div>
+
+                            <!-- Mobile Number -->
+                            <div class="mb-3">
+                                <label for="reg_phone" class="form-premium-label small">
+                                    <i class="fas fa-phone text-success me-1"></i>
+                                    {% if lang_pref == 'te' %}మొబైల్ నంబర్ (Mobile Number):{% else %}Mobile Number:{% endif %}
+                                </label>
+                                <input type="tel" class="form-control form-control-premium text-light" id="reg_phone" name="phone" 
+                                       placeholder="9876543210" pattern="[0-9]{10}" maxlength="10">
+                            </div>
+
+                            <!-- Location with GMaps / Map Selector -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="reg_village" class="form-premium-label small mb-0">
+                                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                        {% if lang_pref == 'te' %}గ్రామం / మండలం (Location from Map): *{% else %}Village / Mandal (from Map): *{% endif %}
+                                    </label>
+                                    <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" id="reg-gps-btn" style="font-size: 11px;">
+                                        <i class="fas fa-crosshairs"></i> {% if lang_pref == 'te' %}నా స్థానం (GPS){% else %}Use GPS{% endif %}
+                                    </button>
+                                </div>
+                                
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control form-control-premium text-light" id="reg_village" name="village_mandal" 
+                                           placeholder="{% if lang_pref == 'te' %}గ్రామం లేదా నగరం వెతకండి లేదా మ్యాప్‌లో పిన్ చేయండి...{% else %}Search town/village or pin on map...{% endif %}" required>
+                                    <button class="btn btn-secondary" type="button" id="reg-search-btn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Hidden coordinates inputs -->
+                                <input type="hidden" id="reg_latitude" name="latitude">
+                                <input type="hidden" id="reg_longitude" name="longitude">
+
+                                <!-- Embedded Interactive Map Picker -->
+                                <div class="map-picker-container rounded border border-secondary mb-1" style="height: 180px; position: relative; z-index: 1;" id="reg-map"></div>
+                                <span class="text-muted" style="font-size: 11px;">
+                                    <i class="fas fa-hand-pointer text-warning"></i> 
+                                    {% if lang_pref == 'te' %}మ్యాప్‌పై క్లిక్ చేసి మీ ఖచ్చితమైన వ్యవసాయ ప్రాంతాన్ని ఎంచుకోండి.{% else %}Tap anywhere on the map to pin your field location.{% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Land Size & Primary Crop -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="reg_land" class="form-premium-label small">
+                                        {% if lang_pref == 'te' %}భూమి (ఎకరాలు):{% else %}Land (Acres):{% endif %}
+                                    </label>
+                                    <input type="number" step="0.1" min="0" class="form-control form-control-premium text-light" id="reg_land" name="land_size_acres" 
+                                           placeholder="2.5" value="2.5" required>
+                                </div>
+                                <div class="col-6">
+                                    <label for="reg_crop" class="form-premium-label small">
+                                        {% if lang_pref == 'te' %}ప్రధాన పంట:{% else %}Primary Crop:{% endif %}
+                                    </label>
+                                    <select class="form-select form-select-premium text-light" id="reg_crop" name="primary_crop" required>
+                                        <option value="Paddy">Paddy / వరి</option>
+                                        <option value="Cotton">Cotton / పత్తి</option>
+                                        <option value="Chilli">Chilli / మిరప</option>
+                                        <option value="Tomato">Tomato / టమోటా</option>
+                                        <option value="Groundnut">Groundnut / వేరుశనగ</option>
+                                        <option value="Maize">Maize / మొక్కజొన్న</option>
+                                        <option value="Pulses">Pulses / పప్పుధాన్యాలు</option>
+                                        <option value="Organic Crops">Organic / సేంద్రీయ</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Language -->
+                            <div class="mb-4">
+                                <label for="reg_language" class="form-premium-label small">
+                                    {% if lang_pref == 'te' %}ప్రాధాన్యత భాష:{% else %}App Language:{% endif %}
+                                </label>
+                                <select class="form-select form-select-premium text-light" id="reg_language" name="language">
+                                    <option value="te" {% if lang_pref == 'te' %}selected{% endif %}>తెలుగు (Telugu)</option>
+                                    <option value="en" {% if lang_pref == 'en' %}selected{% endif %}>English</option>
+                                </select>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn btn-large-tap btn-primary-custom w-100" style="font-size: 16px;">
+                                <i class="fas fa-check-circle me-2"></i> 
+                                {% if lang_pref == 'te' %}నమోదు చేసుకొని ప్రారంభించండి (Register & Enter){% else %}Register & Enter Portal{% endif %}
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let map, marker;
+            const defaultLat = 16.3067;
+            const defaultLon = 80.4365;
+
+            function initRegisterMap() {
+                if (map) return;
+                const mapEl = document.getElementById('reg-map');
+                if (!mapEl) return;
+
+                map = L.map('reg-map').setView([defaultLat, defaultLon], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                marker = L.marker([defaultLat, defaultLon], { draggable: true }).addTo(map);
+
+                function setCoords(lat, lon, placeName) {
+                    marker.setLatLng([lat, lon]);
+                    map.panTo([lat, lon]);
+                    document.getElementById('reg_latitude').value = lat.toFixed(5);
+                    document.getElementById('reg_longitude').value = lon.toFixed(5);
+                    if (placeName) {
+                        document.getElementById('reg_village').value = placeName;
+                    }
+                }
+
+                // Initial coords
+                document.getElementById('reg_latitude').value = defaultLat;
+                document.getElementById('reg_longitude').value = defaultLon;
+
+                // Click on map
+                map.on('click', (e) => {
+                    const lat = e.latlng.lat;
+                    const lon = e.latlng.lng;
+                    setCoords(lat, lon);
+                    reverseGeocode(lat, lon);
+                });
+
+                // Drag marker
+                marker.on('dragend', () => {
+                    const pos = marker.getLatLng();
+                    setCoords(pos.lat, pos.lng);
+                    reverseGeocode(pos.lat, pos.lng);
+                });
+
+                // Reverse geocoding via Open-Meteo or Nominatim
+                async function reverseGeocode(lat, lon) {
+                    try {
+                        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
+                        const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+                        if (res.ok) {
+                            const data = await res.json();
+                            const addr = data.address || {};
+                            const place = addr.village || addr.suburb || addr.town || addr.city || addr.county || addr.state_district || "Selected Location";
+                            document.getElementById('reg_village').value = place;
+                        }
+                    } catch (err) {
+                        console.warn('Reverse geocoding error:', err);
+                    }
+                }
+
+                // GPS button
+                document.getElementById('reg-gps-btn')?.addEventListener('click', () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((pos) => {
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            setCoords(lat, lon);
+                            map.setZoom(12);
+                            reverseGeocode(lat, lon);
+                        }, (err) => {
+                            alert("Location access denied or unavailable.");
+                        });
+                    } else {
+                        alert("Geolocation not supported by your browser.");
+                    }
+                });
+
+                // Search location
+                async function searchLocation() {
+                    const query = document.getElementById('reg_village').value.trim();
+                    if (!query) return;
+                    try {
+                        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+                        const res = await fetch(url);
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                setCoords(lat, lon, data[0].display_name.split(',')[0]);
+                                map.setZoom(12);
+                            } else {
+                                alert("Location not found on map. Try another search term.");
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Search error:", e);
+                    }
+                }
+
+                document.getElementById('reg-search-btn')?.addEventListener('click', searchLocation);
+                document.getElementById('reg_village')?.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchLocation();
+                    }
+                });
+            }
+
+            // Init map when register tab is clicked or active
+            const regTab = document.getElementById('register-tab');
+            if (regTab) {
+                regTab.addEventListener('shown.bs.tab', () => {
+                    setTimeout(() => {
+                        initRegisterMap();
+                        if (map) map.invalidateSize();
+                    }, 200);
+                });
+            }
+
+            {% if active_tab == 'register' %}
+            setTimeout(() => {
+                initRegisterMap();
+                if (map) map.invalidateSize();
+            }, 250);
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

@@ -15,17 +15,45 @@ Rythu Mitra AI ("Farmer's Friend AI") is a mobile-first, offline-capable Agentic
 - **AI Core:** Google Agent Development Kit (ADK) + Gemini 2.5 Flash.
 - **APIs:** Open-Meteo API.
 
-## Setup Instructions
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Copy `.env.example` to `.env` and configure your credentials:
-   ```bash
-   cp .env.example .env
-   ```
-3. Run the application:
-   ```bash
-   python app.py
-   ```
-# Farmer_Assistant_AI
+## Setup & Running Instructions
+
+### 1. Activate the Virtual Environment
+The project includes a configured virtual environment `.venv`:
+```bash
+source .venv/bin/activate
+```
+
+### 2. Verify / Configure Environment Variables
+Ensure your [.env](file:///home/sunny/Downloads/Project/Farmer_Assistant_AI/.env) file is populated with your Gemini API key:
+```bash
+cp .env.example .env
+```
+*(Your `.env` file is already created and configured with the Gemini API key).*
+
+### 3. Start the Web Application
+Run the Flask server:
+```bash
+python app.py
+```
+Or directly using the project's virtual environment:
+```bash
+./.venv/bin/python app.py
+```
+
+### 4. Open in Your Browser
+Navigate to:
+👉 **[http://localhost:5000](http://localhost:5000)**
+
+---
+
+## Key Pages & Navigation
+- **Homepage (`/`)**: Feature showcase, live weather glance widget, 3-step farmer guide.
+- **Farmer Dashboard (`/dashboard`)**: Farmer profile snapshot, quick diagnosis launch, and bilingual AI chat helper.
+- **Farmer Login (`/login`)**:
+  - Direct 10-digit mobile number / Farmer ID sign-in (free, zero SMS cost).
+  - 1-Click **Demo Login** as *రామయ్య (Ramayya - Guntur)*.
+  - New farmer registration with interactive GMaps location picker.
+- **Crop Disease Diagnosis (`/diagnose`)**: Leaf photo upload/camera scan with AI diagnosis and remedies.
+- **Weather Advisories (`/advisory`)**: 3-day hyperlocal weather with safe spraying and irrigation indicators.
+- **Government Welfare Schemes (`/schemes`)**: Real-time eligibility evaluation for 15+ central & AP state schemes with search & category filters.
+- **Profile & Map Settings (`/settings`)**: Interactive Google Maps / Leaflet location picker, GPS detection, land size, and crop preferences.

@@ -32,12 +32,12 @@ class WeatherAgent:
         else:
             self.adk_agent = None
 
-    def get_forecast(self, location_name):
+    def get_forecast(self, location_name, latitude=None, longitude=None):
         """Fetches and prepares the forecast data."""
-        if not location_name:
+        if not location_name and (latitude is None or longitude is None):
             location_name = "Guntur"
         try:
-            return self.weather_service.get_weather_forecast(location_name)
+            return self.weather_service.get_weather_forecast(location_name, latitude=latitude, longitude=longitude)
         except Exception as e:
             logging.error(f"WeatherAgent failed to get forecast: {e}")
             # Safe basic fallback

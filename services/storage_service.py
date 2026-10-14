@@ -62,6 +62,29 @@ class StorageService:
             return Farmer.from_dict(farmer_data)
         return None
 
+    def get_all_farmers(self):
+        farmers = self._read_json(self.farmers_file, {})
+        return [Farmer.from_dict(f) for f in farmers.values()]
+
+    def find_farmer_by_phone_or_id(self, identifier):
+        if not identifier:
+            return None
+        cleaned = str(identifier).strip().lower()
+        farmers = self._read_json(self.farmers_file, {})
+        
+        # Direct key lookup
+        if cleaned in farmers:
+            return Farmer.from_dict(farmers[cleaned])
+            
+        # Search by phone, id, or name
+        for f_data in farmers.values():
+            f_phone = str(f_data.get("phone") or "").strip()
+            f_id = str(f_data.get("id") or "").strip().lower()
+            f_name = str(f_data.get("name") or "").strip().lower()
+            if cleaned == f_phone or cleaned == f_id or (cleaned and cleaned in f_name):
+                return Farmer.from_dict(f_data)
+        return None
+
     def save_farmer(self, farmer: Farmer):
         farmers = self._read_json(self.farmers_file, {})
         farmers[farmer.id] = farmer.to_dict()
