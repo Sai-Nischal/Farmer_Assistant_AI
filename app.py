@@ -170,6 +170,7 @@ def inject_farmer():
 # --- ROUTES ---
 
 @app.route('/')
+@app.route('/api/index')
 def home():
     farmer_id = get_current_farmer_id()
     farmer = storage_service.get_farmer(farmer_id)
