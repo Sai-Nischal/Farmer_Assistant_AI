@@ -105,7 +105,13 @@ class StorageService:
 
     # Government schemes operations
     def get_all_schemes(self):
-        schemes_data = self._read_json(self.schemes_file, [])
+        schemes_path = os.path.join(self.original_data_dir, "schemes.json")
+        with open(schemes_path, 'r', encoding='utf-8') as f:
+            schemes_data = json.load(f)
+
+        if not isinstance(schemes_data, list) or not schemes_data:
+            raise ValueError(f"Scheme catalog must be a non-empty JSON list: {schemes_path}")
+
         return [Scheme.from_dict(s) for s in schemes_data]
 
     # Weather Cache operations
