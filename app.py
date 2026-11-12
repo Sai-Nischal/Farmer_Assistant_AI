@@ -510,37 +510,19 @@ def api_voice_input():
         If it is in Telugu but transliterated (written in English script), output Telugu words in English letters.
         """
         
-        # Note: Gemini 2.5 Flash can process audio files natively.
-        # We wrap this in a multimodal call.
-        # Since we saved the file, we can read and pass it.
-        # However, to avoid legacy SDK issues, we can request a text input by prompting the Gemini Model with the audio.
-        # If the SDK has audio parsing, let's process it. Otherwise, return fallback message.
-        key = session.get('gemini_api_key_override') or os.environ.get("GEMINI_API_KEY")
+        key = (
+            api_key_override
+            or os.environ.get("GEMINI_API_KEY")
+            or os.environ.get("GOOGLE_API_KEY")
+        )
         if not key:
             return jsonify({"error": "Gemini key missing"}), 400
-            
-        # Load Client and model
-        if HAS_NEW_SDK:
-            client = genai.Client(api_key=key)
-            # The google-genai client supports passing audio bytes directly
-            audio_part = types.Part.from_bytes(data=audio_bytes, mime_type="audio/wav")
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[audio_part, prompt]
-            )
-            transcription = response.text
-        elif HAS_LEGACY_SDK:
-            genai_legacy.configure(api_key=key)
-            # Legacy audio upload / passing
-            audio_part = {
-                "mime_type": "audio/wav",
-                "data": audio_bytes
-            }
-            model = genai_legacy.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content([audio_part, prompt])
-            transcription = response.text
-        else:
-            transcription = ""
+
+        transcription = gemini_service.transcribe_audio(
+            audio_bytes,
+            prompt,
+            api_key=key,
+        )
             
         # Cleanup temp file
         os.remove(temp_path)
