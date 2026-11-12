@@ -1,6 +1,7 @@
 import os
 import io
 import logging
+#comment line
 from PIL import Image
 
 try:
